@@ -34,7 +34,7 @@ var magic_constant int = int((n * (n * n * n + 1)) / 2)
 // Cube Generator
 type Cube [][][]int
 type Face [][]int
-//perfect_numbers := []int{25,16,80,104,90,115,98,4,1,97,42,111,85,2,75,66,72,27,102,48,67,18,119,106,5,91,77,71,6,70,52,64,117,69,13,30,118,21,123,23,26,39,92,44,114,116,17,14,73,95,47,61,45,76,86,107,43,38,33,94,89,68,63,58,37,32,93,88,83,19,40,50,81,65,79,31,53,112,109,10,12,82,34,87,100,103,3,105,8,96,113,57,9,62,74,56,120,55,49,35,121,108,7,20,59,29,28,122,125,11,51,15,41,124,84,78,54,99,24,60,36,110,46,22,101}
+// var perfect_numbers := []int{25,16,80,104,90,115,98,4,1,97,42,111,85,2,75,66,72,27,102,48,67,18,119,106,5,91,77,71,6,70,52,64,117,69,13,30,118,21,123,23,26,39,92,44,114,116,17,14,73,95,47,61,45,76,86,107,43,38,33,94,89,68,63,58,37,32,93,88,83,19,40,50,81,65,79,31,53,112,109,10,12,82,34,87,100,103,3,105,8,96,113,57,9,62,74,56,120,55,49,35,121,108,7,20,59,29,28,122,125,11,51,15,41,124,84,78,54,99,24,60,36,110,46,22,101}
 var number_list = []int{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125}
 func generate_cube_from_numbers(numbers []int) Cube {
 	cube := Cube{}
@@ -176,6 +176,26 @@ func get_all_cube_sum(cube Cube) []int {
 
 	return total_sum
 }
+/*
+func generate_all_cube_shifts(cube Cube) []Cube {
+	shifts := []Cube{}
+	current_cube := copy_cube(cube)
+	for i := range 3 {
+		for j := range 3 {
+			shifts = append(shifts, current_cube)
+			current_cube = cube_shift_y(current_cube)
+			_ = j
+		}
+		current_cube = copy_cube(cube)
+		for k:= in range i+1 {
+			current_cube = cube_shift_x(cube)
+			_ = k
+		}
+		_ = i
+	}
+	return shifts
+}
+	*/
 type ObjectiveFunction func(Cube) int
 func violated_magic_sum_count(cube Cube) int {
 	count := 0
@@ -277,8 +297,14 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 }
 
 // Local Search Algorithms
+type SwapPair struct {
+	initial_coordinate []int
+	final_coordinate []int
+}
+
 type LocalSearchResult struct {
 	objective_function_logs []int
+	swap_logs []SwapPair
 	final_state Cube
 }
 
@@ -287,6 +313,7 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResult
 	objective_function_logs := []int{}
+	swap_logs := []SwapPair{}
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
@@ -467,10 +494,10 @@ func main() {
 	// stochastic_hill_climbing
 	// 
 	// 
-	test := steepest_ascent_hill_climbing(cube, sum_of_magic_sum_differences)
-	//test := hill_climbing_with_sideways_move(cube, sum_of_magic_sum_differences)
-	//test := random_restart_hill_climbing(cube, sum_of_magic_sum_differences)
-	//test := stochastic_hill_climbing(cube, sum_of_magic_sum_differences, 1000000)
-	//test := simulated_annealing(cube, violated_magic_sum_count, 100, 10000000, 0.9999999)
+	//test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
+	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
+	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
+	test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
+	//test := simulated_annealing(cube, violated_magic_sum_count, 10, 10000000, 0.09)
 	_ = test
 }
