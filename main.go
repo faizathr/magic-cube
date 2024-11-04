@@ -230,6 +230,7 @@ type AllNeighbors struct {
 	min_neighbor_index int
 	neighbor_states []NeighborState
 }
+
 func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, count int, random_range bool) AllNeighbors {
 	var all_neighbors AllNeighbors
 	
@@ -238,6 +239,8 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 	neighbor_states := []NeighborState{}
 	
 	index := 0
+	swapped_cube_state := copy_cube(cube)
+	var neighbor_state NeighborState
 
 	if !random_range {
 		innerLoop:
@@ -245,15 +248,16 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 			outerLoop:
 			for j := i + 1; j < n * n * n; j++ {
 				if index >= count { break }
-				swapped_cube_state := copy_cube(cube)
-				var neighbor_state NeighborState
+
 				initial_coordinate := []int{fd(fd(i, n), n), fd(i, n) % n, i % n}
 				target_coordinate := []int{fd(fd(j, n), n), fd(j, n) % n, j % n}
 				swapped_cube_state[initial_coordinate[0]][initial_coordinate[1]][initial_coordinate[2]], swapped_cube_state[target_coordinate[0]][target_coordinate[1]][target_coordinate[2]] = swapped_cube_state[target_coordinate[0]][target_coordinate[1]][target_coordinate[2]], swapped_cube_state[initial_coordinate[0]][initial_coordinate[1]][initial_coordinate[2]]
+
 				neighbor_state.initial_coordinate = initial_coordinate
 				neighbor_state.target_coordinate = target_coordinate
 				neighbor_state.swapped_cube_state = swapped_cube_state
 				neighbor_state.objective_function_value = objective_function(swapped_cube_state)
+
 				if neighbor_state.objective_function_value < min_objective_value {
 					min_objective_value = neighbor_state.objective_function_value
 					min_neighbor_index = index
@@ -269,17 +273,19 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 		}
 	} else {
 		for index < count {
-			swapped_cube_state := copy_cube(cube)
-			var neighbor_state NeighborState
+
 			i := randRange(0, 124)
 			j := randRange(i+1, 125)
+			
 			initial_coordinate := []int{fd(fd(i, n), n), fd(i, n) % n, i % n}
 			target_coordinate := []int{fd(fd(j, n), n), fd(j, n) % n, j % n}
 			swapped_cube_state[initial_coordinate[0]][initial_coordinate[1]][initial_coordinate[2]], swapped_cube_state[target_coordinate[0]][target_coordinate[1]][target_coordinate[2]] = swapped_cube_state[target_coordinate[0]][target_coordinate[1]][target_coordinate[2]], swapped_cube_state[initial_coordinate[0]][initial_coordinate[1]][initial_coordinate[2]]
+
 			neighbor_state.initial_coordinate = initial_coordinate
 			neighbor_state.target_coordinate = target_coordinate
 			neighbor_state.swapped_cube_state = swapped_cube_state
 			neighbor_state.objective_function_value = objective_function(swapped_cube_state)
+
 			if neighbor_state.objective_function_value < min_objective_value {
 				min_objective_value = neighbor_state.objective_function_value
 				min_neighbor_index = index
@@ -299,7 +305,7 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 // Local Search Algorithms
 type SwapPair struct {
 	initial_coordinate []int
-	final_coordinate []int
+	target_coordinate []int
 }
 
 type LocalSearchResult struct {
@@ -313,6 +319,7 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResult
 	objective_function_logs := []int{}
+	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
 
 	current_objective_function := objective_function(current_state)
@@ -330,11 +337,17 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 			current_state = neighbor_states.neighbor_states[best_neighbor_index].swapped_cube_state
 			current_objective_function = best_neighbor_value
 			objective_function_logs = append(objective_function_logs, current_objective_function)
+
+			swap_pair.initial_coordinate = neighbor_states.neighbor_states[best_neighbor_index].initial_coordinate
+			swap_pair.target_coordinate = neighbor_states.neighbor_states[best_neighbor_index].target_coordinate
+			swap_logs = append(swap_logs, swap_pair)
+
 			fmt.Println("Objective Function Value:", current_objective_function)
 		}
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
+	local_search_result.swap_logs = swap_logs
 	local_search_result.final_state = current_state
 	return local_search_result
 }
@@ -344,6 +357,8 @@ func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFun
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResult
 	objective_function_logs := []int{}
+	var swap_pair SwapPair
+	swap_logs := []SwapPair{}
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
@@ -360,11 +375,17 @@ func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFun
 			current_state = neighbor_states.neighbor_states[best_neighbor_index].swapped_cube_state
 			current_objective_function = best_neighbor_value
 			objective_function_logs = append(objective_function_logs, current_objective_function)
+
+			swap_pair.initial_coordinate = neighbor_states.neighbor_states[best_neighbor_index].initial_coordinate
+			swap_pair.target_coordinate = neighbor_states.neighbor_states[best_neighbor_index].target_coordinate
+			swap_logs = append(swap_logs, swap_pair)
+
 			fmt.Println("Objective Function Value:", current_objective_function)
 		}
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
+	local_search_result.swap_logs = swap_logs
 	local_search_result.final_state = current_state
 	return local_search_result
 }
@@ -374,6 +395,8 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResult
 	objective_function_logs := []int{}
+	var swap_pair SwapPair
+	swap_logs := []SwapPair{}
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
@@ -389,12 +412,17 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 		} else {
 			current_state = neighbor_states.neighbor_states[best_neighbor_index].swapped_cube_state
 			current_objective_function = best_neighbor_value
+
+			swap_pair.initial_coordinate = neighbor_states.neighbor_states[best_neighbor_index].initial_coordinate
+			swap_pair.target_coordinate = neighbor_states.neighbor_states[best_neighbor_index].target_coordinate
+			swap_logs = append(swap_logs, swap_pair)
 		}
 		objective_function_logs = append(objective_function_logs, current_objective_function)
 		fmt.Println("Objective Function Value:", current_objective_function)
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
+	local_search_result.swap_logs = swap_logs
 	local_search_result.final_state = current_state
 	return local_search_result
 }
@@ -405,6 +433,8 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 	current_iteration := 0
 	var local_search_result LocalSearchResult
 	objective_function_logs := []int{}
+	var swap_pair SwapPair
+	swap_logs := []SwapPair{}
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
@@ -421,6 +451,10 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 			current_state = random_neighbor.swapped_cube_state
 			current_objective_function = random_neighbor_value
 			objective_function_logs = append(objective_function_logs, current_objective_function)
+
+			swap_pair.initial_coordinate = random_neighbor.initial_coordinate
+			swap_pair.target_coordinate = random_neighbor.target_coordinate
+			swap_logs = append(swap_logs, swap_pair)
 		}
 		fmt.Printf("Objective Function Value: %d, Current Iteration: %d\n", current_objective_function, current_iteration)
 
@@ -428,6 +462,7 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
+	local_search_result.swap_logs = swap_logs
 	local_search_result.final_state = current_state
 	return local_search_result
 }
@@ -443,6 +478,8 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResult
 	objective_function_logs := []int{}
+	var swap_pair SwapPair
+	swap_logs := []SwapPair{}
 	var current_iteration float64 = 1
 	current_temperature := initial_temperature
 	
@@ -466,12 +503,20 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 			current_state = random_neighbor.swapped_cube_state
 			current_objective_function = random_neighbor_value
 			objective_function_logs = append(objective_function_logs, current_objective_function)
+
+			swap_pair.initial_coordinate = random_neighbor.initial_coordinate
+			swap_pair.target_coordinate = random_neighbor.target_coordinate
+			swap_logs = append(swap_logs, swap_pair)
 		} else {
 			probability := math.Exp(delta_E / current_temperature)
 			if probability > rand.Float64() {
 				current_state = random_neighbor.swapped_cube_state
 				current_objective_function = random_neighbor_value
 				objective_function_logs = append(objective_function_logs, current_objective_function)
+
+				swap_pair.initial_coordinate = random_neighbor.initial_coordinate
+				swap_pair.target_coordinate = random_neighbor.target_coordinate
+				swap_logs = append(swap_logs, swap_pair)
 			}
 		}
 		fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
@@ -479,6 +524,7 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
+	local_search_result.swap_logs = swap_logs
 	local_search_result.final_state = current_state
 	return local_search_result
 }
