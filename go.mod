@@ -1,3 +1,3 @@
-module tubes-dia
+module magic-cube
 
 go 1.22.7
