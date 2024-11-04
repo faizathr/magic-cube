@@ -239,7 +239,6 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 	neighbor_states := []NeighborState{}
 	
 	index := 0
-	swapped_cube_state := copy_cube(cube)
 	var neighbor_state NeighborState
 
 	if !random_range {
@@ -248,6 +247,8 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 			outerLoop:
 			for j := i + 1; j < n * n * n; j++ {
 				if index >= count { break }
+
+				swapped_cube_state := copy_cube(cube)
 
 				initial_coordinate := []int{fd(fd(i, n), n), fd(i, n) % n, i % n}
 				target_coordinate := []int{fd(fd(j, n), n), fd(j, n) % n, j % n}
@@ -273,6 +274,7 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 		}
 	} else {
 		for index < count {
+			swapped_cube_state := copy_cube(cube)
 
 			i := randRange(0, 124)
 			j := randRange(i+1, 125)
@@ -540,10 +542,11 @@ func main() {
 	// stochastic_hill_climbing
 	// 
 	// 
-	//test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
+	test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
 	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
 	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
-	test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
+	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
 	//test := simulated_annealing(cube, violated_magic_sum_count, 10, 10000000, 0.09)
-	_ = test
+	//_ = test
+	fmt.Println(test.swap_logs)
 }
