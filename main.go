@@ -104,7 +104,7 @@ func copy_cube(cube Cube) Cube {
 	}
 	return new_cube
 }
-func generate_random_numbers() []int {
+func generate_random_numbers() []int { 
 	random_numbers := copy_numbers(number_list)
 	Shuffle(sort.IntSlice(random_numbers))
 	return random_numbers
@@ -119,7 +119,7 @@ func randomize_cube(cube Cube) Cube {
 }
 
 // Objective Function
-func cube_diagonal_sum(face Face) (int, int) {
+func cube_diagonal_sum(face Face) (int, int) { // Count 2 diagonals sum of cube face.
 	first_diagonal_sum, second_diagonal_sum := 0, 0
 	for i := range n { 
 		first_diagonal_sum += face[i][i]
@@ -128,7 +128,7 @@ func cube_diagonal_sum(face Face) (int, int) {
 	return first_diagonal_sum, second_diagonal_sum
 }
 func get_all_cube_sum(cube Cube) []int {
-	total_sum := []int{}
+	total_sum := []int{} // row, col, depth, row, col, depth, 30 diagonals, 4 triagonals
 
 	// Row, Column, Depth
 	for i := range n { 
@@ -241,7 +241,7 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 	index := 0
 	var neighbor_state NeighborState
 
-	if !random_range {
+	if !random_range { // Undefined random range -> 7750 successors
 		innerLoop:
 		for i := range n * n * n {
 			outerLoop:
@@ -272,7 +272,7 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 				}  
 			}
 		}
-	} else {
+	} else { // Defined random range -> n successors
 		for index < count {
 			swapped_cube_state := copy_cube(cube)
 
@@ -470,9 +470,13 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 }
 
 // Simulated Annealing
-func schedule_temperature(current_iteration float64, current_temperature float64, max_iteration float64, cooling_rate float64) float64 {
+func schedule_temperature(current_iteration float64, current_temperature float64, max_iteration float64, cooling_rate float64) float64  {
 	_ = max_iteration
-	return current_temperature * math.Pow(cooling_rate, current_iteration)
+	tempValue = current_temperature * math.Pow(cooling_rate, current_iteration)
+	if tempValue < 0.00005 {
+		return 0.0
+	}
+	return tempValue
 	//_ = cooling_rate
 	//return current_temperature * ((max_iteration - current_iteration) / max_iteration)
 }
@@ -491,7 +495,7 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 
 	for current_iteration < max_iteration && current_objective_function > 0 {
 		current_temperature = schedule_temperature(current_iteration, current_temperature, max_iteration, cooling_rate)
-		if current_temperature == 0 {
+		if current_temperature == 0.0 {
 			break
 		}
 		neighbor_states := generate_neighbor_states(current_state, objective_function, 1, true)
