@@ -7,6 +7,27 @@ import (
 	"sort"
 )
 
+func weightedRandomChoiceFloat(arr []float64) int {
+    // Calculate the total sum of all weights.
+    sum := 0.0
+    for _, val := range arr {
+        sum += val
+    }
+
+    // Generate a random number in the range [0, sum).
+    r := rand.Float64() * sum
+    cumulative := 0.0
+
+    for i, val := range arr {
+        cumulative += val
+        if r < cumulative {
+            return i
+        }
+    }
+
+    return len(arr) - 1
+}
+
 // Primitives
 // Floor Division
 func fd(a, b int) int {
@@ -472,7 +493,7 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 // Simulated Annealing
 func schedule_temperature(current_iteration float64, current_temperature float64, max_iteration float64, cooling_rate float64) float64  {
 	_ = max_iteration
-	tempValue = current_temperature * math.Pow(cooling_rate, current_iteration)
+	tempValue := current_temperature * math.Pow(cooling_rate, current_iteration)
 	if tempValue < 0.00005 {
 		return 0.0
 	}
@@ -480,9 +501,16 @@ func schedule_temperature(current_iteration float64, current_temperature float64
 	//_ = cooling_rate
 	//return current_temperature * ((max_iteration - current_iteration) / max_iteration)
 }
-func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initial_temperature float64, max_iteration float64, cooling_rate float64) LocalSearchResult {
+type SimulatedAnnealingResult struct {
+	objective_function_logs []int
+	swap_logs []SwapPair
+	final_state Cube
+	stuck_iteration int
+}
+func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initial_temperature float64, max_iteration float64, cooling_rate float64) SimulatedAnnealingResult {
 	current_state := copy_cube(cube)
-	var local_search_result LocalSearchResult
+	stuck_iteration := 0
+	var simulated_local_result SimulatedAnnealingResult
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
@@ -523,20 +551,186 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 				swap_pair.initial_coordinate = random_neighbor.initial_coordinate
 				swap_pair.target_coordinate = random_neighbor.target_coordinate
 				swap_logs = append(swap_logs, swap_pair)
+				stuck_iteration += 1
 			}
 		}
 		fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
 		current_iteration += 1
 	}
 
-	local_search_result.objective_function_logs = objective_function_logs
-	local_search_result.swap_logs = swap_logs
-	local_search_result.final_state = current_state
-	return local_search_result
+	simulated_local_result.objective_function_logs = objective_function_logs
+	simulated_local_result.swap_logs = swap_logs
+	simulated_local_result.final_state = current_state
+	simulated_local_result.stuck_iteration = stuck_iteration
+	return simulated_local_result
+}
+
+type GeneticAlgorithmResult struct {
+
+	// initial state
+	initial_cube []Cube
+	initial_best_cube Cube // for visualization: initial state of cube (best cube)
+	initial_best_value int // initial value of the best cube (best value) 
+
+	// final state
+	final_cube []Cube // 
+	final_best_cube Cube // for visualization: final state of cube (best cube)
+	final_best_value int // final value of the best cube (best value)
+
+	// iteration visualization purpose
+	objective_value_plot []int // for visualization: plot of the best value of every iteration
+	avg_objective_value int // for visualization: average of the best valie (accumulative of all iterations)
+	// essential constants
+	population int
+	iteration int
+}
+
+
+func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n_iteration int) GeneticAlgorithmResult {
+	
+	// Essential constants
+	var genetic_algorithm_result GeneticAlgorithmResult 
+	population := n_population
+	iteration := n_iteration
+	
+	// initial state (constant) -> consists of n_population cubes
+	initial_cube := []Cube{}
+	initial_best_cube := Cube{}
+	initial_best_value := 999
+
+	// final state (always treat the last) -> consists of n_population cubes
+	final_cube := []Cube{}
+	final_best_cube := Cube{}
+	final_best_value := 999
+
+	objective_value_plot := []int{}
+	avg_objective_value := 0
+
+	// Used for iterations
+	current_cube := []Cube{}
+
+
+
+	// generate n random cubes, copy to initial_cube
+	// get initial_best_cube, initial_best_value
+	// copy to current_cube for iteration
+	// NOT yet iteration
+	for i := range population { 
+		_ = i
+		initial_cube = append(initial_cube, generate_random_cube())
+		current_cube = append(current_cube, initial_cube[i]) // -> consists of n_population cubes
+
+		// fmt.Printf("%d\n", objective_function(initial_cube[i])
+		obj_value_check := objective_function(initial_cube[i]) // check value
+
+		if obj_value_check < initial_best_value {
+			initial_best_value = obj_value_check
+			initial_best_cube = initial_cube[i]
+		}
+	}
+
+	// initial objective value
+	objective_value_plot = append(objective_value_plot, initial_best_value)
+
+	// fmt.Printf("best value: %d\n", initial_best_value)
+	// fmt.Printf("obj value plot: %d\n", objective_value_plot)
+
+
+	// Start of Iterations
+	for i := range iteration {
+		current_best_value := 999
+		_ = i
+		// fmt.Printf("iterasi ke- %d\n", i+1)
+		// every iteration reset
+		fitness_sum := 0
+		// best_objective_value = 999
+		n_objective_value := []int{}
+
+		// count all current objective value
+		for j := range population {
+			n_objective_value = append(n_objective_value, objective_function(current_cube[j]))
+			fitness_sum += n_objective_value[j]
+		}
+		
+		// fmt.Println(n_objective_value)
+
+		// Sum of Fitness function of every chromosome
+		fitness_value := []float64{}
+		for j := range population { // check fitness value
+			_ = j
+			fitness_value = append(fitness_value, float64(n_objective_value[j])/float64(fitness_sum))
+		}
+
+		// fmt.Printf("fitness value: \n")
+		// fmt.Println(fitness_value)
+
+
+		// Selection using weightedRandomChoiceFloat
+		for j := range population { // spin wheel (weighted probs)
+			_ = j
+			x := weightedRandomChoiceFloat(fitness_value)
+			final_cube = append(final_cube, current_cube[x]) // from chosen x of weighted
+			// fmt.Printf("%d \n", objective_function(final_cube[j]))
+		}
+
+		// Find best value of current state before moving to neighbour
+		for j := range population {
+			_ = j
+			obj_value_check := objective_function(final_cube[i])
+			if obj_value_check < current_best_value {
+				current_best_value = obj_value_check
+			}
+		}
+		objective_value_plot = append(objective_value_plot, current_best_value)
+
+
+		// fmt.Println()
+
+		// Preparation to next iteration
+		// Copy final into current
+		// Free up final state
+		current_cube = []Cube{}
+		for j := range population {
+			_ = j
+			current_cube = append(current_cube, final_cube[j])
+			// fmt.Printf("%d \n", objective_function(current_cube[j]))
+		}
+		final_cube = []Cube{}
+		current_best_value = 999
+	}
+
+
+	// Put final best cube
+	for i := range population {
+		_ = i
+		final_cube = append(final_cube, current_cube[i])
+		obj_value_check := objective_function(final_cube[i])
+		if obj_value_check < final_best_value {
+			final_best_value = obj_value_check
+			final_best_cube = final_cube[i]
+		}
+	}
+
+	// fmt.Println()
+	// fmt.Println(final_best_value)
+	// fmt.Println(objective_value_plot)
+
+	genetic_algorithm_result.initial_cube = initial_cube
+	genetic_algorithm_result.initial_best_cube = initial_best_cube
+	genetic_algorithm_result.initial_best_value = initial_best_value
+	genetic_algorithm_result.final_cube = final_cube
+	genetic_algorithm_result.final_best_cube = final_best_cube
+	genetic_algorithm_result.final_best_value = final_best_value
+	genetic_algorithm_result.objective_value_plot = objective_value_plot
+	genetic_algorithm_result.avg_objective_value = avg_objective_value
+	genetic_algorithm_result.population = population
+	genetic_algorithm_result.iteration = iteration
+
+	return genetic_algorithm_result
 }
 
 func main() {
-	var cube Cube = generate_random_cube()
+	// var cube Cube = generate_random_cube()
 	// violated_magic_sum_count
 	// sum_of_magic_sum_differences
 
@@ -546,11 +740,13 @@ func main() {
 	// stochastic_hill_climbing
 	// 
 	// 
-	test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
+	// test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
 	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
 	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
 	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
 	//test := simulated_annealing(cube, violated_magic_sum_count, 10, 10000000, 0.09)
+	genetic_algorithm(violated_magic_sum_count, 1000, 1000)
+	fmt.Printf("Program finished, no error occurred.")
 	//_ = test
-	fmt.Println(test.swap_logs)
+	// fmt.Println(test.swap_logs)
 }
