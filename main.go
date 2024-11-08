@@ -4,23 +4,25 @@ import (
 	"fmt"
 	"math"
 	"math/rand/v2"
+	"slices"
 	"sort"
 )
 
 func weightedRandomChoiceFloat(arr []float64) int {
-    // Calculate the total sum of all weights.
+	// Calculate the total sum of all weights.
     sum := 0.0
     for _, val := range arr {
         sum += val
     }
 
-    // Generate a random number in the range [0, sum).
-    r := rand.Float64() * sum
+	// Generate a random number in the range [0, sum).
+	r := rand.Float64() * sum
+   
     cumulative := 0.0
 
     for i, val := range arr {
         cumulative += val
-        if r < cumulative {
+        if r <= cumulative {
             return i
         }
     }
@@ -589,7 +591,7 @@ type GeneticAlgorithmResult struct {
 func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n_iteration int) GeneticAlgorithmResult {
 	
 	// Essential constants
-	var genetic_algorithm_result GeneticAlgorithmResult 
+	var genetic_algorithm_result GeneticAlgorithmResult
 	population := n_population
 	iteration := n_iteration
 	
@@ -603,86 +605,100 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 	final_best_cube := Cube{}
 	final_best_value := 999
 
-	objective_value_plot := []int{}
+	objective_value_plot := []int{} // for visualization: plot of the best value of every iteration
 	avg_objective_value := 0
 
 	// Used for iterations
 	current_cube := []Cube{}
 
+	
+	// ===== generate n random cubes to initial_cube, copy to current_cube =====
 
-
-	// generate n random cubes, copy to initial_cube
 	// get initial_best_cube, initial_best_value
-	// copy to current_cube for iteration
+	// generate random n_population initial cubes
 	// NOT yet iteration
+
+	// fmt.Println("this is initial cube before selected from initial cube")
 	for i := range population { 
 		_ = i
-		initial_cube = append(initial_cube, generate_random_cube())
-		current_cube = append(current_cube, initial_cube[i]) // -> consists of n_population cubes
-
-		// fmt.Printf("%d\n", objective_function(initial_cube[i])
-		obj_value_check := objective_function(initial_cube[i]) // check value
-
-		if obj_value_check < initial_best_value {
+		initial_cube = append(initial_cube, generate_random_cube()) // generate n random cubes
+		obj_value_check := objective_function(initial_cube[i]) // check objective value
+		fmt.Println(obj_value_check)
+		// fmt.Println(objective_function(initial_cube[i])) // debugging purpose
+		if obj_value_check < initial_best_value { //get the best initial value
 			initial_best_value = obj_value_check
 			initial_best_cube = initial_cube[i]
 		}
 	}
-
-	// initial objective value
+	fmt.Println()
+	fmt.Println(initial_best_value)
+	// deep copy initial_cube into current_cube
+	current_cube = slices.Clone(initial_cube)
+	// ===== initial max objective value plot ======
 	objective_value_plot = append(objective_value_plot, initial_best_value)
+
+	// fmt.Println("this is current cube after cloned and before selected from initial cube")
+	// for j := range population {
+	// 	fmt.Println(objective_function(current_cube[j]))
+	// }
 
 	// fmt.Printf("best value: %d\n", initial_best_value)
 	// fmt.Printf("obj value plot: %d\n", objective_value_plot)
 
-
-	// Start of Iterations
+	// ===== Start of Iterations ======
 	for i := range iteration {
+		fmt.Printf("iterasi ke- %d\n", i+1) // iteration number debug
+
+		// fmt.Println("this is current cube after cloned and before selected from final cube inside iterations")
+		// for j := range population {
+		// 	fmt.Println(objective_function(current_cube[j]))
+		// }
+
+		// initial preparation for iterations
 		current_best_value := 999
-		_ = i
-		// fmt.Printf("iterasi ke- %d\n", i+1)
-		// every iteration reset
-		fitness_sum := 0
+		fitness_sum := 0.0
 		// best_objective_value = 999
 		n_objective_value := []int{}
 
-		// count all current objective value
-		for j := range population {
-			n_objective_value = append(n_objective_value, objective_function(current_cube[j]))
-			fitness_sum += n_objective_value[j]
-		}
-		
-		// fmt.Println(n_objective_value)
-
-		// Sum of Fitness function of every chromosome
+		// ===== Count all fitness value =====
 		fitness_value := []float64{}
 		for j := range population { // check fitness value
 			_ = j
-			fitness_value = append(fitness_value, float64(n_objective_value[j])/float64(fitness_sum))
+			n_objective_value = append(n_objective_value, objective_function(current_cube[j]))
+			fitness_value = append(fitness_value, 1.0 / float64(n_objective_value[j] + 1))
 		}
 
-		// fmt.Printf("fitness value: \n")
-		// fmt.Println(fitness_value)
+		// Normalize fitness values
+		for _, value := range fitness_value {
+			fitness_sum += value
+		}
+		for j := range fitness_value {
+			fitness_value[j] /= fitness_sum
+		}
 
-
-		// Selection using weightedRandomChoiceFloat
+		// ===== Selection using weightedRandomChoiceFloat =====
 		for j := range population { // spin wheel (weighted probs)
 			_ = j
 			x := weightedRandomChoiceFloat(fitness_value)
-			final_cube = append(final_cube, current_cube[x]) // from chosen x of weighted
-			// fmt.Printf("%d \n", objective_function(final_cube[j]))
+			// fmt.Printf("x: %d\n", x)
+			final_cube = append(final_cube, current_cube[x]) // from chosen x index using weighted func
 		}
 
-		// Find best value of current state before moving to neighbour
+		// ===== Crossover =====
+
+
+
+		// Find the best value of final state before moving to the next iteration
 		for j := range population {
 			_ = j
-			obj_value_check := objective_function(final_cube[i])
+			obj_value_check := objective_function(final_cube[j])
 			if obj_value_check < current_best_value {
 				current_best_value = obj_value_check
 			}
 		}
-		objective_value_plot = append(objective_value_plot, current_best_value)
 
+		fmt.Println(current_best_value)
+		objective_value_plot = append(objective_value_plot, current_best_value)
 
 		// fmt.Println()
 
@@ -690,29 +706,36 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 		// Copy final into current
 		// Free up final state
 		current_cube = []Cube{}
-		for j := range population {
-			_ = j
-			current_cube = append(current_cube, final_cube[j])
-			// fmt.Printf("%d \n", objective_function(current_cube[j]))
-		}
+		current_cube = slices.Clone(final_cube)
+
+		// fmt.Println("this is current cube after cloned and selected from final cube")
+		// for j := range population {
+		// 	fmt.Println(objective_function(current_cube[j]))
+		// }
+
+
 		final_cube = []Cube{}
-		current_best_value = 999
 	}
 
+	fmt.Println("end of iterations ")
 
-	// Put final best cube
+	// Put final best cube after all iterations finished
+	final_cube = slices.Clone(current_cube)
 	for i := range population {
 		_ = i
-		final_cube = append(final_cube, current_cube[i])
+		fmt.Println(objective_function(final_cube[i]))
+
 		obj_value_check := objective_function(final_cube[i])
 		if obj_value_check < final_best_value {
 			final_best_value = obj_value_check
 			final_best_cube = final_cube[i]
 		}
 	}
-
+	fmt.Println("index terakhir plot: ")
+	fmt.Println(objective_value_plot[len(objective_value_plot)-1])
+	fmt.Println(objective_value_plot)
 	// fmt.Println()
-	// fmt.Println(final_best_value)
+	fmt.Println(final_best_value)
 	// fmt.Println(objective_value_plot)
 
 	genetic_algorithm_result.initial_cube = initial_cube
@@ -745,7 +768,7 @@ func main() {
 	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
 	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
 	//test := simulated_annealing(cube, violated_magic_sum_count, 10, 10000000, 0.09)
-	genetic_algorithm(violated_magic_sum_count, 1000, 1000)
+	genetic_algorithm(violated_magic_sum_count, 5, 20)
 	fmt.Printf("Program finished, no error occurred.")
 	//_ = test
 	// fmt.Println(test.swap_logs)
