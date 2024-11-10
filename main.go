@@ -259,7 +259,6 @@ type AllNeighbors struct {
 	min_neighbor_index int
 	neighbor_states []NeighborState
 }
-
 func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, count int, random_range bool) AllNeighbors {
 	var all_neighbors AllNeighbors
 	
@@ -366,13 +365,6 @@ type LocalSearchResultRestart struct {
 	restart_iteration int
 }
 
-type LocalSearchResultStochastic struct {
-	objective_function_logs []int
-	swap_logs []SwapPair
-	final_state Cube
-	time int
-	iteration int
-}
 
 // Steepest Ascent Hill-climbing
 func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSteepestAscent {
@@ -487,7 +479,17 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 	return local_search_result
 }
 
-// Stochastic Hill-climbing
+// ======== Stochastic Hill-climbing ========
+
+type LocalSearchResultStochastic struct {
+	objective_function_logs []int
+	swap_logs []SwapPair
+	final_state Cube
+	time int
+	iteration int
+	max_iteration int
+}
+
 func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration int) LocalSearchResultStochastic {
 	current_state := copy_cube(cube)
 	current_iteration := 0
@@ -524,18 +526,12 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 	local_search_result.objective_function_logs = objective_function_logs
 	local_search_result.swap_logs = swap_logs
 	local_search_result.final_state = current_state
+	local_search_result.max_iteration = max_iteration
+	local_search_result.iteration = current_iteration
 	return local_search_result
 }
 
-// Simulated Annealing
-func schedule_temperature(current_iteration float64, current_temperature float64, cooling_rate float64) float64  {
-
-	tempValue := current_temperature * math.Pow(cooling_rate, current_iteration)
-	if tempValue < 0.00005 {
-		return 0.0
-	}
-	return tempValue
-}
+// ======== Simulated Annealing ========
 type SimulatedAnnealingResult struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
@@ -546,6 +542,16 @@ type SimulatedAnnealingResult struct {
 	not_changed int // delta_E <= 0 tetapi tidak berubah
 	probability_plot []float64 // for visualization purpose
 }
+
+func schedule_temperature(current_iteration float64, current_temperature float64, cooling_rate float64) float64  {
+
+	tempValue := current_temperature * math.Pow(cooling_rate, current_iteration)
+	if tempValue < 0.00005 {
+		return 0.0
+	}
+	return tempValue
+}
+
 func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initial_temperature float64, cooling_rate float64) SimulatedAnnealingResult {
 	timeStart := time.Now() // for time elapsed purpose
 	temperature := []float64{} // for visualization purpose
@@ -600,7 +606,7 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 				swap_pair.target_coordinate = random_neighbor.target_coordinate
 				swap_logs = append(swap_logs, swap_pair)
 				stuck_iteration += 1
-			} else { tidakBerubah += 1 }
+			} else { tidakBerubah += 1 } // karena lebih buruk dan tidak masuk threshold
 		}
 		fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
 		current_iteration += 1
@@ -618,6 +624,7 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	return simulated_local_result
 }
 
+// ======== Genetic Algorithm ========
 func crossoverTwoSlices(parent1, parent2 Cube) (Cube, Cube) {
 	parent1_num := generate_numbers_from_cube(parent1)
 	parent2_num := generate_numbers_from_cube(parent2)
@@ -833,7 +840,7 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 }
 
 func main() {
-	// var cube Cube = generate_random_cube()
+	var cube Cube = generate_random_cube()
 	// violated_magic_sum_count
 	// sum_of_magic_sum_differences
 
@@ -846,29 +853,28 @@ func main() {
 	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
 	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
 	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
-	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 10, 1000)
+
+	// ===== SIMULATED ANNEALING TEST =====
+	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10000000000000, 0.99999999)
+	fmt.Printf("time exceeded: %d\n", test_simulated_annealing.time)
+	fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
+	fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
+	fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
+	fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
+	fmt.Println(len(test_simulated_annealing.swap_logs))
 	
 	// ===== GENETIC ALGORITHM TEST =====
-	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 6, 10)
-	// fmt.Printf("objective value plot: %d\n", test_genetic_algorithm.objective_value_plot)
-	// fmt.Printf("len obj value plot: %d\n", len(test_genetic_algorithm.objective_value_plot))
-	// fmt.Printf("avg objective value: %d\n", test_genetic_algorithm.avg_objective_value)
-	// fmt.Printf("len avg obj value: %d\n", len(test_genetic_algorithm.avg_objective_value))
-	// fmt.Printf("population: %d\n", test_genetic_algorithm.population)
-	// fmt.Printf("iteration: %d\n", test_genetic_algorithm.iteration)
-	// fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
-	// fmt.Printf("time elapsed: %d\n", test_genetic_algorithm.time)
+	test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 6, 1000)
+	fmt.Printf("objective value plot: %d\n", test_genetic_algorithm.objective_value_plot)
+	fmt.Printf("len obj value plot: %d\n", len(test_genetic_algorithm.objective_value_plot))
+	fmt.Printf("avg objective value: %d\n", test_genetic_algorithm.avg_objective_value)
+	fmt.Printf("len avg obj value: %d\n", len(test_genetic_algorithm.avg_objective_value))
+	fmt.Printf("population: %d\n", test_genetic_algorithm.population)
+	fmt.Printf("iteration: %d\n", test_genetic_algorithm.iteration)
+	fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
+	fmt.Printf("time elapsed: %d\n", test_genetic_algorithm.time)
 	
-	
-	// ===== SIMULATED ANNEALING TEST =====
-	// test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10, 0.9999)
-	// fmt.Printf("time exceeded: %d\n", test_simulated_annealing.time)
-	// fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
-	// fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
-	// fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
-	// fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
-	// fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
-	// fmt.Println(len(test_simulated_annealing.swap_logs))
 	
 	
 
