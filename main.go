@@ -484,13 +484,14 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 type LocalSearchResultStochastic struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
+	initial_state Cube
 	final_state Cube
 	time int
 	iteration int
 	max_iteration int
 }
 
-func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration int) LocalSearchResultStochastic {
+func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration int) LocalSearchResultStochastic{
 	current_state := copy_cube(cube)
 	current_iteration := 0
 	var local_search_result LocalSearchResultStochastic
@@ -500,10 +501,9 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
-	fmt.Printf("Objective Function Value: %d, Current Iteration: %d\n", current_objective_function, current_iteration)
-	current_iteration += 1
+	// fmt.Printf("Objective Function Value: %d, Current Iteration: %d\n", current_objective_function, current_iteration)
 
-	for current_iteration <= max_iteration && current_objective_function > 0 {
+	for current_iteration < max_iteration && current_objective_function > 0 {
 		neighbor_states := generate_neighbor_states(current_state, objective_function, 1, true)
 		random_neighbor_index := neighbor_states.min_neighbor_index
 		random_neighbor := neighbor_states.neighbor_states[random_neighbor_index]
@@ -518,13 +518,14 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 			swap_pair.target_coordinate = random_neighbor.target_coordinate
 			swap_logs = append(swap_logs, swap_pair)
 		}
-		fmt.Printf("Objective Function Value: %d, Current Iteration: %d\n", current_objective_function, current_iteration)
+		// fmt.Printf("Objective Function Value: %d, Current Iteration: %d\n", current_objective_function, current_iteration + 1)
 
 		current_iteration += 1
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
 	local_search_result.swap_logs = swap_logs
+	local_search_result.initial_state = copy_cube(cube)
 	local_search_result.final_state = current_state
 	local_search_result.max_iteration = max_iteration
 	local_search_result.iteration = current_iteration
@@ -535,12 +536,12 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 type SimulatedAnnealingResult struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
+	initial_state Cube
 	final_state Cube
-	stuck_iteration int
+	stuck_iteration int // frekuensi stuck
 	time int
-	temperatures []float64
 	not_changed int // delta_E <= 0 tetapi tidak berubah
-	probability_plot []float64 // for visualization purpose
+	probability_plot []float64 // plot e^delteE/T for visualization purpose
 }
 
 func schedule_temperature(current_iteration float64, current_temperature float64, cooling_rate float64) float64  {
@@ -554,7 +555,6 @@ func schedule_temperature(current_iteration float64, current_temperature float64
 
 func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initial_temperature float64, cooling_rate float64) SimulatedAnnealingResult {
 	timeStart := time.Now() // for time elapsed purpose
-	temperature := []float64{} // for visualization purpose
 	probability_plot := []float64{} // for visualization purpose
 	current_state := copy_cube(cube)
 	stuck_iteration := 0
@@ -564,7 +564,6 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	swap_logs := []SwapPair{}
 	var current_iteration float64 = 1
 	current_temperature := initial_temperature
-	temperature = append(temperature, current_temperature) // for visualization purpose
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
 	// fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
@@ -573,7 +572,6 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	// for current_iteration < max_iteration && current_objective_function > 0 {
 	for current_temperature > 0.0 && current_objective_function > 0 {
 		current_temperature = schedule_temperature(current_iteration, current_temperature, cooling_rate)
-		temperature = append(temperature, math.Round(current_temperature * 100) / 100) // for visualization purpose
 		// fmt.Printf("Current Temperature: %f\n", current_temperature)
 		// fmt.Println(temperature)
 		if current_temperature == 0.0 {
@@ -614,9 +612,9 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 
 	simulated_local_result.objective_function_logs = objective_function_logs
 	simulated_local_result.swap_logs = swap_logs
+	simulated_local_result.initial_state = copy_cube(cube)
 	simulated_local_result.final_state = current_state
 	simulated_local_result.stuck_iteration = stuck_iteration
-	simulated_local_result.temperatures = temperature
 	simulated_local_result.not_changed = tidakBerubah
 	simulated_local_result.probability_plot = probability_plot
 	timeElapsed := time.Since(timeStart)
@@ -852,10 +850,20 @@ func main() {
 	// test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
 	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
 	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
-	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
+	
+	// ===== STOCHASTIC HILL CLIMBING TEST =====
+	test_stochastic := stochastic_hill_climbing(cube, violated_magic_sum_count, 10000)
+	fmt.Printf("time elapsed: %d\n", test_stochastic.time)
+	fmt.Printf("iteration: %d\n", test_stochastic.iteration)
+	fmt.Printf("max iteration: %d\n", test_stochastic.max_iteration)
+	fmt.Printf("Initial Obj Value: %d\n", test_stochastic.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_stochastic.objective_function_logs[len(test_stochastic.objective_function_logs)-1])
+	fmt.Printf("Len swap logs: %d\n", len(test_stochastic.swap_logs))
+	fmt.Printf("Len objective function logs: %d\n", len(test_stochastic.objective_function_logs))
+
 
 	// ===== SIMULATED ANNEALING TEST =====
-	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10000000000000, 0.99999999)
+	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 1000000, 0.99)
 	fmt.Printf("time exceeded: %d\n", test_simulated_annealing.time)
 	fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
 	fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
