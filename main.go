@@ -652,7 +652,7 @@ type GeneticAlgorithmResult struct {
 
 	// iteration visualization purpose
 	objective_value_plot []int // for visualization: plot of the best value of every iteration
-	avg_objective_value int // for visualization: average of the best valie (accumulative of all iterations)
+	avg_objective_value []int // for visualization: average of the best valie (accumulative of all iterations)
 	// essential constants
 	population int
 	iteration int
@@ -678,7 +678,8 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 	final_best_value := 999
 
 	objective_value_plot := []int{} // for visualization: plot of the best value of every iteration
-	avg_objective_value := 0
+	avg_objective_value := []int{} // for visualization: average of the value of every iteration
+	obj_value_sum := 0
 
 	// Used for iterations
 	current_cube := []Cube{}
@@ -694,12 +695,15 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 		_ = i
 		initial_cube = append(initial_cube, generate_random_cube()) // generate n random cubes
 		obj_value_check := objective_function(initial_cube[i]) // check objective value
-
+		obj_value_sum += obj_value_check
 		if obj_value_check < initial_best_value { //get the best initial value
 			initial_best_value = obj_value_check
 			initial_best_cube = initial_cube[i]
 		}
 	}
+
+	// count initial avg_objective_value
+	avg_objective_value = append(avg_objective_value, obj_value_sum / population)
 
 	// deep copy initial_cube into current_cube
 	current_cube = slices.Clone(initial_cube)
@@ -710,6 +714,7 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 	// ===== Start of Iterations ======
 	for i := range iteration {
 		_ = i
+		obj_value_sum = 0
 		// initial preparation for iterations
 		current_best_value := 999
 		fitness_sum := 0.0
@@ -783,10 +788,13 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 		for j := range population {
 			_ = j
 			obj_value_check := objective_function(current_cube[j])
+			obj_value_sum += obj_value_check
 			if obj_value_check < current_best_value {
 				current_best_value = obj_value_check
 			}
 		}
+
+		avg_objective_value = append(avg_objective_value, obj_value_sum / population)
 
 		objective_value_plot = append(objective_value_plot, current_best_value)
 
@@ -825,7 +833,7 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 }
 
 func main() {
-	var cube Cube = generate_random_cube()
+	// var cube Cube = generate_random_cube()
 	// violated_magic_sum_count
 	// sum_of_magic_sum_differences
 
@@ -840,15 +848,25 @@ func main() {
 	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
 	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 10, 1000)
 	
+	// ===== GENETIC ALGORITHM TEST =====
+	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 6, 10)
+	// fmt.Printf("objective value plot: %d\n", test_genetic_algorithm.objective_value_plot)
+	// fmt.Printf("len obj value plot: %d\n", len(test_genetic_algorithm.objective_value_plot))
+	// fmt.Printf("avg objective value: %d\n", test_genetic_algorithm.avg_objective_value)
+	// fmt.Printf("len avg obj value: %d\n", len(test_genetic_algorithm.avg_objective_value))
+	// fmt.Printf("population: %d\n", test_genetic_algorithm.population)
+	// fmt.Printf("iteration: %d\n", test_genetic_algorithm.iteration)
+	// fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
+	// fmt.Printf("time elapsed: %d\n", test_genetic_algorithm.time)
 	
 	
 	// ===== SIMULATED ANNEALING TEST =====
-	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10, 0.9999)
-	fmt.Printf("time exceeded: %d\n", test_simulated_annealing.time)
-	fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
-	fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
-	fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
-	fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
+	// test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10, 0.9999)
+	// fmt.Printf("time exceeded: %d\n", test_simulated_annealing.time)
+	// fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
+	// fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
+	// fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
+	// fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
 	// fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
 	// fmt.Println(len(test_simulated_annealing.swap_logs))
 	
