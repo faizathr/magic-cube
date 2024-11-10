@@ -346,16 +346,6 @@ type LocalSearchResultSteepestAscent struct {
 	iteration int
 }
 
-type LocalSearchResultSidewaysMove struct {
-	objective_function_logs []int
-	swap_logs []SwapPair
-	final_state Cube
-	max_sideways int
-	time int
-	iteration int
-}
-
-
 // Steepest Ascent Hill-climbing
 func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSteepestAscent {
 	current_state := copy_cube(cube)
@@ -394,8 +384,18 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 	return local_search_result
 }
 
+type LocalSearchResultSidewaysMove struct {
+	objective_function_logs []int
+	swap_logs []SwapPair
+	final_state Cube
+	max_sideways int
+	time int
+	iteration int
+}
+
 // Hill-climbing with Sideways Move
 func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSidewaysMove {
+	
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResultSidewaysMove
 	objective_function_logs := []int{}
@@ -432,8 +432,6 @@ func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFun
 	return local_search_result
 }
 
-
-
 // ======== Random Restart Hill-climbing ========
 type LocalSearchResultRestart struct {
 	objective_function_logs []int
@@ -447,9 +445,10 @@ type LocalSearchResultRestart struct {
 	restart_iteration int
 }
 
-func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_restart_allowed int) LocalSearchResultRestart {
+func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_restart_allowed_input int) LocalSearchResultRestart {
 	timeStart := time.Now()
 	current_state := copy_cube(cube)
+	max_restart_allowed := max_restart_allowed_input
 	restart_iteration := 0
 	iteration_per_every_restart := []int{}
 	var local_search_result LocalSearchResultRestart
@@ -520,8 +519,9 @@ type LocalSearchResultStochastic struct {
 	max_iteration int
 }
 
-func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration int) LocalSearchResultStochastic{
+func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration_allowed int) LocalSearchResultStochastic{
 	timeStart := time.Now()
+	max_iteration := max_iteration_allowed
 	current_state := copy_cube(cube)
 	current_iteration := 0
 	var local_search_result LocalSearchResultStochastic
