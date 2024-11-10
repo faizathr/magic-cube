@@ -6,6 +6,7 @@ import (
 	"math/rand/v2"
 	"slices"
 	"sort"
+	"time"
 )
 
 func weightedRandomChoiceFloat(arr []float64) int {
@@ -332,22 +333,51 @@ func generate_neighbor_states(cube Cube, objective_function ObjectiveFunction, c
 	return all_neighbors
 }
 
-// Local Search Algorithms
+// ======== Hill Climbing Algorithms ========
 type SwapPair struct {
 	initial_coordinate []int
 	target_coordinate []int
 }
 
-type LocalSearchResult struct {
+type LocalSearchResultSteepestAscent struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
 	final_state Cube
+	time int
+	iteration int
+}
+
+type LocalSearchResultSidewaysMove struct {
+	objective_function_logs []int
+	swap_logs []SwapPair
+	final_state Cube
+	max_sideways int
+	time int
+	iteration int
+}
+
+type LocalSearchResultRestart struct {
+	objective_function_logs []int
+	swap_logs []SwapPair
+	final_state Cube
+	max_restart int
+	time int
+	iteration_per_restart int
+	restart_iteration int
+}
+
+type LocalSearchResultStochastic struct {
+	objective_function_logs []int
+	swap_logs []SwapPair
+	final_state Cube
+	time int
+	iteration int
 }
 
 // Steepest Ascent Hill-climbing
-func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResult {
+func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSteepestAscent {
 	current_state := copy_cube(cube)
-	var local_search_result LocalSearchResult
+	var local_search_result LocalSearchResultSteepestAscent
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
@@ -383,9 +413,9 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 }
 
 // Hill-climbing with Sideways Move
-func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFunction) LocalSearchResult {
+func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSidewaysMove {
 	current_state := copy_cube(cube)
-	var local_search_result LocalSearchResult
+	var local_search_result LocalSearchResultSidewaysMove
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
@@ -421,9 +451,9 @@ func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFun
 }
 
 // Random Restart Hill-climbing
-func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResult {
+func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResultRestart {
 	current_state := copy_cube(cube)
-	var local_search_result LocalSearchResult
+	var local_search_result LocalSearchResultRestart
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
@@ -458,10 +488,10 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 }
 
 // Stochastic Hill-climbing
-func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration int) LocalSearchResult {
+func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, max_iteration int) LocalSearchResultStochastic {
 	current_state := copy_cube(cube)
 	current_iteration := 0
-	var local_search_result LocalSearchResult
+	var local_search_result LocalSearchResultStochastic
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
@@ -498,23 +528,28 @@ func stochastic_hill_climbing(cube Cube, objective_function ObjectiveFunction, m
 }
 
 // Simulated Annealing
-func schedule_temperature(current_iteration float64, current_temperature float64, max_iteration float64, cooling_rate float64) float64  {
-	_ = max_iteration
+func schedule_temperature(current_iteration float64, current_temperature float64, cooling_rate float64) float64  {
+
 	tempValue := current_temperature * math.Pow(cooling_rate, current_iteration)
 	if tempValue < 0.00005 {
 		return 0.0
 	}
 	return tempValue
-	//_ = cooling_rate
-	//return current_temperature * ((max_iteration - current_iteration) / max_iteration)
 }
 type SimulatedAnnealingResult struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
 	final_state Cube
 	stuck_iteration int
+	time int
+	temperatures []float64
+	not_changed int // delta_E <= 0 tetapi tidak berubah
+	probability_plot []float64 // for visualization purpose
 }
-func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initial_temperature float64, max_iteration float64, cooling_rate float64) SimulatedAnnealingResult {
+func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initial_temperature float64, cooling_rate float64) SimulatedAnnealingResult {
+	timeStart := time.Now() // for time elapsed purpose
+	temperature := []float64{} // for visualization purpose
+	probability_plot := []float64{} // for visualization purpose
 	current_state := copy_cube(cube)
 	stuck_iteration := 0
 	var simulated_local_result SimulatedAnnealingResult
@@ -523,13 +558,18 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	swap_logs := []SwapPair{}
 	var current_iteration float64 = 1
 	current_temperature := initial_temperature
-	
+	temperature = append(temperature, current_temperature) // for visualization purpose
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
-	fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
+	// fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
 
-	for current_iteration < max_iteration && current_objective_function > 0 {
-		current_temperature = schedule_temperature(current_iteration, current_temperature, max_iteration, cooling_rate)
+	tidakBerubah := 0 // cek deltaE < 0 tetapi tidak berpindah
+	// for current_iteration < max_iteration && current_objective_function > 0 {
+	for current_temperature > 0.0 && current_objective_function > 0 {
+		current_temperature = schedule_temperature(current_iteration, current_temperature, cooling_rate)
+		temperature = append(temperature, math.Round(current_temperature * 100) / 100) // for visualization purpose
+		// fmt.Printf("Current Temperature: %f\n", current_temperature)
+		// fmt.Println(temperature)
 		if current_temperature == 0.0 {
 			break
 		}
@@ -539,8 +579,8 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 		random_neighbor_value := random_neighbor.objective_function_value
 		
 		delta_E := float64(current_objective_function - random_neighbor_value)
-
 		if delta_E > 0 {
+			probability_plot = append(probability_plot, 1)
 			current_state = random_neighbor.swapped_cube_state
 			current_objective_function = random_neighbor_value
 			objective_function_logs = append(objective_function_logs, current_objective_function)
@@ -550,6 +590,7 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 			swap_logs = append(swap_logs, swap_pair)
 		} else {
 			probability := math.Exp(delta_E / current_temperature)
+			probability_plot = append(probability_plot, probability)
 			if probability > rand.Float64() {
 				current_state = random_neighbor.swapped_cube_state
 				current_objective_function = random_neighbor_value
@@ -559,7 +600,7 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 				swap_pair.target_coordinate = random_neighbor.target_coordinate
 				swap_logs = append(swap_logs, swap_pair)
 				stuck_iteration += 1
-			}
+			} else { tidakBerubah += 1 }
 		}
 		fmt.Printf("Objective Function Value: %d, Current Iteration: %d, Current Temperature: %f\n", current_objective_function, int(current_iteration), current_temperature)
 		current_iteration += 1
@@ -569,6 +610,11 @@ func simulated_annealing(cube Cube, objective_function ObjectiveFunction, initia
 	simulated_local_result.swap_logs = swap_logs
 	simulated_local_result.final_state = current_state
 	simulated_local_result.stuck_iteration = stuck_iteration
+	simulated_local_result.temperatures = temperature
+	simulated_local_result.not_changed = tidakBerubah
+	simulated_local_result.probability_plot = probability_plot
+	timeElapsed := time.Since(timeStart)
+	simulated_local_result.time = int(timeElapsed.Milliseconds())
 	return simulated_local_result
 }
 
@@ -610,12 +656,14 @@ type GeneticAlgorithmResult struct {
 	// essential constants
 	population int
 	iteration int
+	time int
 }
 
 func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n_iteration int) GeneticAlgorithmResult {
 	
 	// Essential constants
 	var genetic_algorithm_result GeneticAlgorithmResult
+	timeStart := time.Now()
 	population := n_population
 	iteration := n_iteration
 	
@@ -718,6 +766,7 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 		}
 
 		// ===== Mutation =====
+		// mutation used: swap between 2 cube of 5*5*5 cubes
 		for j := range population {
 			_ = j
 			x1 := rand.IntN(5)
@@ -749,8 +798,6 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 		final_cube = slices.Clone(current_cube)
 	}
 
-	// fmt.Println("end of iterations ")
-
 	// Put final best cube after all iterations finished
 	for i := range population {
 		_ = i
@@ -761,10 +808,7 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 			final_best_cube = final_cube[i]
 		}
 	}
-	// fmt.Println("index terakhir plot: ")
-	// fmt.Println(len(objective_value_plot))
-	// fmt.Println(final_best_value)
-
+	
 	genetic_algorithm_result.initial_cube = initial_cube
 	genetic_algorithm_result.initial_best_cube = initial_best_cube
 	genetic_algorithm_result.initial_best_value = initial_best_value
@@ -775,12 +819,13 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 	genetic_algorithm_result.avg_objective_value = avg_objective_value
 	genetic_algorithm_result.population = population
 	genetic_algorithm_result.iteration = iteration
-
+	timeElapsed := time.Since(timeStart)
+	genetic_algorithm_result.time = int(timeElapsed.Milliseconds())
 	return genetic_algorithm_result
 }
 
 func main() {
-	// var cube Cube = generate_random_cube()
+	var cube Cube = generate_random_cube()
 	// violated_magic_sum_count
 	// sum_of_magic_sum_differences
 
@@ -788,15 +833,28 @@ func main() {
 	// hill_climbing_with_sideways_move
 	// random_restart_hill_climbing
 	// stochastic_hill_climbing
-	// 
-	// 
+
 	// test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
 	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
 	//test := random_restart_hill_climbing(cube, violated_magic_sum_count)
 	//test := stochastic_hill_climbing(cube, violated_magic_sum_count, 1000000)
-	//test := simulated_annealing(cube, violated_magic_sum_count, 10, 10000000, 0.09)
-	genetic_algorithm(violated_magic_sum_count, 100, 1000)
+	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 10, 1000)
+	
+	
+	
+	// ===== SIMULATED ANNEALING TEST =====
+	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10, 0.9999)
+	fmt.Printf("time exceeded: %d\n", test_simulated_annealing.time)
+	fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
+	fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
+	fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
+	// fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
+	// fmt.Println(len(test_simulated_annealing.swap_logs))
+	
+	
+
+	// ===== end of program =====
 	fmt.Printf("Program finished, no error occurred.")
 	//_ = test
-	// fmt.Println(test.swap_logs)
 }
