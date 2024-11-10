@@ -341,6 +341,7 @@ type SwapPair struct {
 type LocalSearchResultSteepestAscent struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
+	initial_state Cube
 	final_state Cube
 	time int
 	iteration int
@@ -348,7 +349,9 @@ type LocalSearchResultSteepestAscent struct {
 
 // Steepest Ascent Hill-climbing
 func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSteepestAscent {
+	timeStart := time.Now()
 	current_state := copy_cube(cube)
+	iteration := 0 // iteration counter
 	var local_search_result LocalSearchResultSteepestAscent
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
@@ -376,17 +379,24 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 
 			fmt.Println("Objective Function Value:", current_objective_function)
 		}
+		if improved { iteration += 1}
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
 	local_search_result.swap_logs = swap_logs
+	local_search_result.initial_state = copy_cube(cube)
 	local_search_result.final_state = current_state
+	local_search_result.iteration = iteration
+
+	timeElapsed := time.Since(timeStart)
+	local_search_result.time = int(timeElapsed.Milliseconds())
 	return local_search_result
 }
 
 type LocalSearchResultSidewaysMove struct {
 	objective_function_logs []int
 	swap_logs []SwapPair
+	initial_state Cube
 	final_state Cube
 	max_sideways int
 	time int
@@ -394,41 +404,63 @@ type LocalSearchResultSidewaysMove struct {
 }
 
 // Hill-climbing with Sideways Move
-func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFunction) LocalSearchResultSidewaysMove {
-	
+func hill_climbing_with_sideways_move(cube Cube, objective_function ObjectiveFunction, max_sideways_allowed int) LocalSearchResultSidewaysMove {
+	timeStart := time.Now()
+	max_sideways := max_sideways_allowed
 	current_state := copy_cube(cube)
 	var local_search_result LocalSearchResultSidewaysMove
 	objective_function_logs := []int{}
 	var swap_pair SwapPair
 	swap_logs := []SwapPair{}
+	iteration := 0
+	max_sideways_counter := 0
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
-	fmt.Println("Objective Function Value:", current_objective_function)
-
+	// fmt.Println("Initial Objective Function Value:", current_objective_function)
 	improved := true
+
 	for improved && current_objective_function > 0 {
 		neighbor_states := generate_neighbor_states(current_state, objective_function, 7750, false)
 		best_neighbor_value := neighbor_states.min_objective_value
 		best_neighbor_index := neighbor_states.min_neighbor_index
-		if best_neighbor_value > current_objective_function {
+		if best_neighbor_value > current_objective_function { // neighbor lebih buruk
 			improved = false
 		} else {
-			current_state = neighbor_states.neighbor_states[best_neighbor_index].swapped_cube_state
-			current_objective_function = best_neighbor_value
-			objective_function_logs = append(objective_function_logs, current_objective_function)
+			if max_sideways_counter < max_sideways {
+				current_state = neighbor_states.neighbor_states[best_neighbor_index].swapped_cube_state
+				if current_objective_function == best_neighbor_value {
+					max_sideways_counter += 1 // sideways move
+					// fmt.Printf("sideways move! %d\n", max_sideways_counter)
+				} else {
+					max_sideways_counter = 0
+					// fmt.Println("sideways reset!")
+				}
+				current_objective_function = best_neighbor_value
+	
+				objective_function_logs = append(objective_function_logs, current_objective_function)
 
-			swap_pair.initial_coordinate = neighbor_states.neighbor_states[best_neighbor_index].initial_coordinate
-			swap_pair.target_coordinate = neighbor_states.neighbor_states[best_neighbor_index].target_coordinate
-			swap_logs = append(swap_logs, swap_pair)
+				swap_pair.initial_coordinate = neighbor_states.neighbor_states[best_neighbor_index].initial_coordinate
+				swap_pair.target_coordinate = neighbor_states.neighbor_states[best_neighbor_index].target_coordinate
+				swap_logs = append(swap_logs, swap_pair)
 
-			fmt.Println("Objective Function Value:", current_objective_function)
+				// fmt.Println("Objective Function Value:", current_objective_function)
+			} else {
+				improved = false
+			}
 		}
+		if improved { iteration += 1} // increment iteration
 	}
 
 	local_search_result.objective_function_logs = objective_function_logs
 	local_search_result.swap_logs = swap_logs
+	local_search_result.initial_state = copy_cube(cube)
 	local_search_result.final_state = current_state
+	local_search_result.max_sideways = max_sideways
+	local_search_result.iteration = iteration
+
+	timeElapsed := time.Since(timeStart)
+	local_search_result.time = int(timeElapsed.Milliseconds())
 	return local_search_result
 }
 
@@ -458,7 +490,7 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
 	// fmt.Println("Initial Objective Function Value:", current_objective_function)
-	total_iteration := 0
+
 	iteration_per_restart_counter := 0
 	for current_objective_function > 0 && restart_iteration < max_restart_allowed + 1{
 		neighbor_states := generate_neighbor_states(current_state, objective_function, 7750, false)
@@ -490,6 +522,7 @@ func random_restart_hill_climbing(cube Cube, objective_function ObjectiveFunctio
 		// fmt.Println("Objective Function Value:", current_objective_function)
 	}
 
+	total_iteration := 0 // count total iteration
 	for i := range iteration_per_every_restart {
 		total_iteration += iteration_per_every_restart[i]
 	}
@@ -870,21 +903,37 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 }
 
 func main() {
-	var cube Cube = generate_random_cube()
-	// violated_magic_sum_count
-	// sum_of_magic_sum_differences
-
-	// steepest_ascent_hill_climbing
-	// hill_climbing_with_sideways_move
-	// random_restart_hill_climbing
-	// stochastic_hill_climbing
-
-	// test := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
-	//test := hill_climbing_with_sideways_move(cube, violated_magic_sum_count)
+	// var cube Cube = generate_random_cube()
 	
+	// choose one of objective function
+	// 1. violated_magic_sum_count
+	// 2. sum_of_magic_sum_differences
+
+	// ===== STEEPEST ASCENT TEST =====
+	// test_steepest_ascent := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
+	// fmt.Println("======== Steepest Ascent Test ========")
+	// fmt.Printf("Steepest Ascent: time exceeded: %d\n", test_steepest_ascent.time)
+	// fmt.Printf("iteration: %d\n", test_steepest_ascent.iteration)
+	// fmt.Printf("Initial Obj Value: %d\n", test_steepest_ascent.objective_function_logs[0])
+	// fmt.Printf("Final Obj Value: %d\n", test_steepest_ascent.objective_function_logs[len(test_steepest_ascent.objective_function_logs)-1])
+	// fmt.Printf("Len swap logs: %d\n", len(test_steepest_ascent.swap_logs))
+	// fmt.Printf("Len objective function logs: %d\n", len(test_steepest_ascent.objective_function_logs))
+
+	// ===== HILL CLIMBING WITH SIDEWAYS MOVE TEST =====
+	// test_sideways_move := hill_climbing_with_sideways_move(cube, violated_magic_sum_count, 5)
+	// fmt.Println("======== Hill Climbing with Sideways Move Test ========")
+	// fmt.Printf("Sideways Move: time exceeded: %d\n", test_sideways_move.time)
+	// fmt.Printf("iteration: %d\n", test_sideways_move.iteration)
+	// fmt.Printf("max sideways: %d\n", test_sideways_move.max_sideways)
+	// fmt.Printf("Initial Obj Value: %d\n", test_sideways_move.objective_function_logs[0])
+	// fmt.Printf("Final Obj Value: %d\n", test_sideways_move.objective_function_logs[len(test_sideways_move.objective_function_logs)-1])
+	// fmt.Printf("Len swap logs: %d\n", len(test_sideways_move.swap_logs))
+	// fmt.Printf("Len objective function logs: %d\n", len(test_sideways_move.objective_function_logs))
+
 	// ===== RANDOM RESTART TEST =====
-	test_random_restart := random_restart_hill_climbing(cube, violated_magic_sum_count, 5)
-	fmt.Printf("Random Restart: time exceeded: %d\n", test_random_restart.time)
+	// test_random_restart := random_restart_hill_climbing(cube, violated_magic_sum_count, 5)
+	// fmt.Println("======== Random Restart Test ========")
+	// fmt.Printf("Random Restart: time exceeded: %d\n", test_random_restart.time)
 	// fmt.Printf("iteration per restart: %d\n", test_random_restart.iteration_per_restart)	
 	// fmt.Printf("max restart: %d\n", test_random_restart.max_restart)
 	// fmt.Printf("restart iteration: %d\n", test_random_restart.restart_iteration)
@@ -893,9 +942,11 @@ func main() {
 	// fmt.Printf("Len swap logs: %d\n", len(test_random_restart.swap_logs))
 	// fmt.Printf("Len objective function logs: %d\n", len(test_random_restart.objective_function_logs))
 	// fmt.Printf("Total iteration: %d\n", test_random_restart.total_iteration)
+
 	// ===== STOCHASTIC HILL CLIMBING TEST =====
-	test_stochastic := stochastic_hill_climbing(cube, violated_magic_sum_count, 10000)
-	fmt.Printf("Stochastic: time exceeded: %d\n", test_stochastic.time)
+	// test_stochastic := stochastic_hill_climbing(cube, violated_magic_sum_count, 10000)
+	// fmt.Println("======== Stochastic Hill Climbing Test ========")
+	// fmt.Printf("Stochastic: time exceeded: %d\n", test_stochastic.time)
 	// fmt.Printf("iteration: %d\n", test_stochastic.iteration)
 	// fmt.Printf("max iteration: %d\n", test_stochastic.max_iteration)
 	// fmt.Printf("Initial Obj Value: %d\n", test_stochastic.objective_function_logs[0])
@@ -903,27 +954,31 @@ func main() {
 	// fmt.Printf("Len swap logs: %d\n", len(test_stochastic.swap_logs))
 	// fmt.Printf("Len objective function logs: %d\n", len(test_stochastic.objective_function_logs))
 
-
-	// // ===== SIMULATED ANNEALING TEST =====
-	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 1000000, 0.99999)
-	fmt.Printf("SA, time exceeded: %d\n", test_simulated_annealing.time)
+	// ===== SIMULATED ANNEALING TEST =====
+	// test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 1000000, 0.99999)
+	// fmt.Println("======== Simulated Annealing Test ========")
+	// fmt.Printf("SA, time exceeded: %d\n", test_simulated_annealing.time)
 	// fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
 	// fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
 	// fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
+	// fmt.Printf("len swap logs: %d\n", len(test_simulated_annealing.swap_logs))
+	// fmt.Printf("len objective function logs: %d\n", len(test_simulated_annealing.objective_function_logs))
+	// fmt.Printf("len probability plot: %d\n", len(test_simulated_annealing.probability_plot))
 	// fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
 	// fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
-	// fmt.Println(len(test_simulated_annealing.swap_logs))
+
 	
-	// // ===== GENETIC ALGORITHM TEST =====
-	test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 6, 1000)
-	// fmt.Printf("objective value plot: %d\n", test_genetic_algorithm.objective_value_plot)
+	// ===== GENETIC ALGORITHM TEST =====
+	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 6, 1000)
+	// fmt.Println("======== Genetic Algorithm Test ========")
+	// fmt.Printf("GA objective value plot: %d\n", test_genetic_algorithm.objective_value_plot)
 	// fmt.Printf("len obj value plot: %d\n", len(test_genetic_algorithm.objective_value_plot))
 	// fmt.Printf("avg objective value: %d\n", test_genetic_algorithm.avg_objective_value)
 	// fmt.Printf("len avg obj value: %d\n", len(test_genetic_algorithm.avg_objective_value))
 	// fmt.Printf("population: %d\n", test_genetic_algorithm.population)
 	// fmt.Printf("iteration: %d\n", test_genetic_algorithm.iteration)
 	// fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
-	fmt.Printf("GA, time exceeded: %d\n", test_genetic_algorithm.time)
+	// fmt.Printf("GA, time exceeded: %d\n", test_genetic_algorithm.time)
 	
 	
 	
