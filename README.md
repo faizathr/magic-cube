@@ -42,9 +42,9 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Pengerjaan Laporan Bagian Deskripsi Persoalan
 - Pengerjaan Laporan Bagian Pemilihan Objective Function 
 - Pengerjaan Laporan Bagian Penjelasan Implementasi 3 Algoritma Local Search (Hill-Climbing with Sideways Move, Random Restart Hill-Climbing, Stochastic Hill-Climbing)
-- Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis
-- Pengerjaan Kesimpulan dan Saran
-- Pembuatan README
+- Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis (Bagian Analisis Perbandingan Algoritma dalam Mendekati Global Optima dan Bagian Analisis Perbandingan Hasil Pencarian Algoritma)
+- Pengerjaan Bagian 3.1 Kesimpulan dan 3.2 Saran 
+- Pengerjaan README
 2. Irfan Musthofa - **18222056**
 - Pembuatan Source Code Genetic Algorithm
 - Finalisasi Source Code Steepest Ascent Hill-Climbing
@@ -52,6 +52,8 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Finalisasi Source Code Random Restart Hill-Climbing
 - Finalisasi Source Code Stochastic Hill-Climbing
 - Finalisasi Source Code  Simulated Annealing
+- Pembuatan Front-End
+- Melakukan semua Testing dan Debugging
 - Finalisasi Laporan Tugas Besar
 3. Eleanor Cordelia - **18222059**
 - Pengerjaan Laporan Bagian Deskripsi Persoalan
