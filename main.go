@@ -9,6 +9,122 @@ import (
 	"time"
 )
 
+func printOutput(cube Cube) {
+	n := 5
+	// fmt.Println()
+	// fmt.Println(cube_shift_y(cube))
+	// fmt.Println()
+	// fmt.Println(cube_shift_x(cube))
+	// fmt.Println()
+    // Print cube faces for z=1 to z=n (original)
+	
+    fmt.Println("5 faces for z=1 until z=5 (original - top to bottom view):")
+    for k := 0; k < n; k++ {
+        fmt.Printf("Face for z=%d:\n", k+1)
+        for j := 0; j < n; j++ {
+            fmt.Println(cube[k][j])
+        }
+        fmt.Println()
+    }
+
+    // Print cube faces for z=1 to z=n (rotation around y-axis)
+    fmt.Println("5 faces for z=1 until z=5 (rotation around y-axis):")
+    rotatedY := cube_shift_y(cube)
+    for k := 0; k < n; k++ {
+        fmt.Printf("Face for z=%d:\n", k+1)
+        for j := 0; j < n; j++ {
+            fmt.Println(rotatedY[k][j])
+        }
+        fmt.Println()
+    }
+
+    // Print cube faces for z=1 to z=n (rotation around x-axis)
+    fmt.Println("5 faces for z=1 until z=5 (rotation around x-axis):")
+    rotatedX := cube_shift_x(cube)
+    for k := 0; k < n; k++ {
+        fmt.Printf("Face for z=%d:\n", k+1)
+        for j := 0; j < n; j++ {
+            fmt.Println(rotatedX[k][j])
+        }
+        fmt.Println()
+    }
+
+    // Print all 6 oblique faces of the cube
+    fmt.Println("6 faces for all oblique faces of the cube:")
+
+    // Oblique faces from top-left to bottom-right (xy-plane)
+	fmt.Printf("Oblique face (from top-left to bottom-right in xy-plane):\n")
+    for d := 0; d < n; d++ {
+        for i := 0; i < n; i++ {
+            if i < n && d < n {
+                fmt.Print(cube[i][i][d], " ")
+            }
+        }
+        fmt.Println()
+    }
+	fmt.Println()
+
+    // Oblique faces from top-right to bottom-left (xy-plane)
+	fmt.Printf("Oblique face (from top-right to bottom-left in xy-plane):\n")
+    for d := 0; d < n; d++ {
+        for i := 0; i < n; i++ {
+            if i < n && d < n {
+                fmt.Print(cube[i][n-1-i][d], " ")
+            }
+        }
+        fmt.Println()
+    }
+	fmt.Println()
+
+    // Oblique faces from top-left to bottom-right (yz-plane)
+	fmt.Printf("Oblique face (from top-left to bottom-right in yz-plane):\n")
+    for d := 0; d < n; d++ {
+        for j := 0; j < n; j++ {
+            if j < n && d < n {
+                fmt.Print(cube[d][j][j], " ")
+            }
+        }
+        fmt.Println()
+    }
+	fmt.Println()
+
+    // Oblique faces from top-right to bottom-left (yz-plane)
+	fmt.Printf("Oblique face (from top-right to bottom-left in yz-plane):\n")
+    for d := 0; d < n; d++ {
+        for j := 0; j < n; j++ {
+            if j < n && d < n {
+                fmt.Print(cube[d][j][n-1-j], " ")
+            }
+        }
+        fmt.Println()
+    }
+	fmt.Println()
+
+    // Oblique faces from top-left to bottom-right (xz-plane)
+	fmt.Printf("Oblique face (from top-left to bottom-right in xz-plane):\n")
+    for d := 0; d < n; d++ {
+        for i := 0; i < n; i++ {
+            if i < n && d < n {
+                fmt.Print(cube[i][d][i], " ")
+            }
+        }
+        fmt.Println()
+    }
+	fmt.Println()
+
+    // Oblique faces from top-right to bottom-left (xz-plane)
+	fmt.Printf("Oblique face (from top-right to bottom-left in xz-plane):\n")
+    for d := 0; d < n; d++ {
+        for i := 0; i < n; i++ {
+            if i < n && d < n {
+                fmt.Print(cube[i][d][n-1-i], " ")
+            }
+        }
+        fmt.Println()
+    }
+	fmt.Println()
+}
+
 func weightedRandomChoiceFloat(arr []float64) int {
 	// Calculate the total sum of all weights.
     sum := 0.0
@@ -359,7 +475,7 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 
 	current_objective_function := objective_function(current_state)
 	objective_function_logs = append(objective_function_logs, current_objective_function)
-	fmt.Println("Objective Function Value:", current_objective_function)
+	// fmt.Println("Objective Function Value:", current_objective_function)
 
 	improved := true
 	for improved && current_objective_function > 0 {
@@ -377,7 +493,7 @@ func steepest_ascent_hill_climbing(cube Cube, objective_function ObjectiveFuncti
 			swap_pair.target_coordinate = neighbor_states.neighbor_states[best_neighbor_index].target_coordinate
 			swap_logs = append(swap_logs, swap_pair)
 
-			fmt.Println("Objective Function Value:", current_objective_function)
+			// fmt.Println("Objective Function Value:", current_objective_function)
 		}
 		if improved { iteration += 1}
 	}
@@ -903,21 +1019,23 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 }
 
 func main() {
-	// var cube Cube = generate_random_cube()
+	var cube Cube = generate_random_cube()
 	
 	// choose one of objective function
 	// 1. violated_magic_sum_count
 	// 2. sum_of_magic_sum_differences
 
 	// ===== STEEPEST ASCENT TEST =====
-	// test_steepest_ascent := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
-	// fmt.Println("======== Steepest Ascent Test ========")
+	test_steepest_ascent := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
+	fmt.Println("======== Steepest Ascent Test ========")
 	// fmt.Printf("Steepest Ascent: time exceeded: %d\n", test_steepest_ascent.time)
 	// fmt.Printf("iteration: %d\n", test_steepest_ascent.iteration)
 	// fmt.Printf("Initial Obj Value: %d\n", test_steepest_ascent.objective_function_logs[0])
 	// fmt.Printf("Final Obj Value: %d\n", test_steepest_ascent.objective_function_logs[len(test_steepest_ascent.objective_function_logs)-1])
 	// fmt.Printf("Len swap logs: %d\n", len(test_steepest_ascent.swap_logs))
 	// fmt.Printf("Len objective function logs: %d\n", len(test_steepest_ascent.objective_function_logs))
+	fmt.Println(test_steepest_ascent.final_state)
+	printOutput(test_steepest_ascent.final_state)
 
 	// ===== HILL CLIMBING WITH SIDEWAYS MOVE TEST =====
 	// test_sideways_move := hill_climbing_with_sideways_move(cube, violated_magic_sum_count, 5)
