@@ -1,0 +1,106 @@
+<!-- Licensed under a BSD license. See license.html for license -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+		<title>Magic Cube Local Search</title>
+		<link href="style.css" rel="stylesheet">
+		<script>
+			let q = (x) => {
+				return document.querySelector(x);
+			};
+		</script>
+		<script src="Chart.min.js"></script>
+	</head>
+	<body>
+		<canvas id="three-js-canvas"></canvas>
+		<canvas id="objective-function-chart" style="width:100%;max-width:700px"></canvas>
+		<div class="flex flex-col">
+			<input type="range" step="1" min="0" value="0" class="w-10/12 mx-auto">
+			<div class="p-4 rounded-full border mx-auto mt-4">
+				<div class="playpause">
+					<input type="checkbox" id="playpause" checked/>
+					<label for="playpause" tabindex=1></label>
+				</div>
+			</div>
+		</div>
+		<script>
+			const chart = new Chart("objective-function-chart", {
+				type: "line",
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Objective Function Value',
+						data: [],
+						borderColor: "red",
+						fill: false
+					}]
+				},
+				options: {
+					scales: {
+						yAxes: [{
+							ticks: {
+								reverse: true,
+							}
+						}]
+					}
+				}
+			});
+
+			function genLabels(n) {
+				let labels = [];
+				for (let i = 1; i < n + 1; i++) {
+					labels.push(i);
+				}
+				return labels;
+			}
+
+			let interval = 100;
+			let chartdata = [109,107,105,103,102,101,99,98,97,96,95,94,92,91,90,89,88,87,86,85,84,83,82,81,79,78,77,76,75,74,73,72,71,70,69,68,67,66];
+			q("input[type='range']").max = (chartdata.length - 1).toString();
+			let indexPointer = 0;
+			function updateChart() {
+				chart.data.labels = genLabels(chartdata.length);
+				chart.data.datasets[0].data = chartdata.slice(0,parseInt(q("input[type='range']").value) + 1);
+				chart.update();
+			}
+			q("input[type='range']").oninput = () => {
+				clearInterval(playInterval);
+				q("#playpause").checked = true;
+
+				updateChart();
+			};
+			
+			function playLoop() {
+				if (q("input[type='range']").value == q("input[type='range']").max) {
+					clearInterval(playInterval);
+					q("#playpause").checked = true;
+				}
+				q("input[type='range']").value++;
+				updateChart();
+			}
+
+			let playInterval;
+			q("#playpause").oninput = () => {
+				if (!q("#playpause").checked) {
+					if (q("input[type='range']").value == q("input[type='range']").max) {
+						q("input[type='range']").value = 0;
+					}
+					playInterval = setInterval(playLoop, interval * 2);
+				} else {
+					clearInterval(playInterval);
+				}
+			}
+		</script>
+		<script type="importmap">
+		{
+			"imports": {
+				"three": "/three-js/three.module.js",
+				"three/addons/": "/three-js/"
+			}
+		}
+		</script>
+		<script src="cube.js" type="module"></script>
+	</body>
+</html>
