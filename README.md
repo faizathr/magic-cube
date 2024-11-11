@@ -9,3 +9,14 @@
 2. Irfan Musthofa - **18222056**
 3. Eleanor Cordelia - **18222059**
 4. Muhammad Faiz Atharrahman - **18222063**
+
+## Daftar Isi
+- **Cara Setup dan Menjalankan Program**
+- **Pembagian Kerja Anggota Kelompok**
+
+### Cara Setup dan Menjalankan Program
+Langkah-langkah di bawah ini akan membantu untuk mengatur dan menjalankan program secara lokal.
+Pastikan telah menginstall:
+- **Go** : https://golang.org/doc/install untuk menjalankan program utama.
+- **Git**: https://git-scm.com/downloads untuk mengkloning repository ini.
+
