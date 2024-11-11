@@ -2,7 +2,7 @@
 ## *oleh Kelompok 16*
 
 *Magic Cube Solver adalah program yang mengimplementasikan algoritma pencarian lokal dan metaheuristik untuk menyelesaikan permasalahan optimasi pada susunan Magic Cube.*
-*Repository ini berisi implementasi berbagai algoritma pencarian lokal dan metaheuristik untuk menyelesaikan permasalahan Magic Cube. Algoritma yang diimplementasikan meliputi variasi Hill Climbing (dengan Sideways Move, Random Restart, dan Stochastic), Simulated Annealing, serta Genetic Algorithm. Program ini bertujuan untuk mencari solusi optimal atau mendekati optimal dengan efisiensi waktu yang baik.*
+*Repository ini berisi implementasi berbagai algoritma pencarian lokal dan metaheuristik untuk menyelesaikan permasalahan Magic Cube. Algoritma yang diimplementasikan meliputi variasi Hill Climbing (dengan Steepest Ascent, Sideways Move, Random Restart, dan Stochastic), Simulated Annealing, serta Genetic Algorithm. Program ini bertujuan untuk mencari solusi optimal atau mendekati optimal dengan efisiensi waktu yang baik.*
 
 ## Anggota Kelompok
 1. Thalita Zahra Sutejo - **18222023**
@@ -53,3 +53,18 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Finalisasi Source Code Stochastic Hill-Climbing
 - Finalisasi Source Code  Simulated Annealing
 - Finalisasi Laporan Tugas Besar
+3. Eleanor Cordelia - **18222059**
+- Pengerjaan Laporan Bagian Deskripsi Persoalan
+- Pengerjaan Laporan Bagian Pemilihan Objective Function
+- Pengerjaan Laporan Bagian Penjelasan Implementasi 3 Algoritma Local Search (Steepest Ascent Hill-Climbing, Simulated Annealing, Genetic Algorithm)
+- Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis
+- Pengerjaan Kesimpulan dan Saran
+- Pembuatan README
+4. Muhammad Faiz Atharrahman - **18222063**
+- Pembuatan Source Code Steepest Ascent Hill-Climbing
+- Pembuatan Source Code Hill-Climbing with Sideways Move
+- Pembuatan Source Code Random Restart Hill-Climbing
+- Pembuatan Source Code Stochastic Hill-Climbing
+- Pembuatan Source Code  Simulated Annealing
+- Pembuatan Visualisasi 3D
+- Pembuatan Plot Grafik
