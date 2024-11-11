@@ -45,6 +45,7 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis (Bagian Analisis Perbandingan Algoritma dalam Mendekati Global Optima dan Bagian Analisis Perbandingan Hasil Pencarian Algoritma)
 - Pengerjaan Bagian 3.1 Kesimpulan dan 3.2 Saran 
 - Pengerjaan README
+- Finalisasi Laporan Tugas Besar
 2. Irfan Musthofa - **18222056**
 - Pembuatan Source Code Genetic Algorithm
 - Finalisasi Source Code Steepest Ascent Hill-Climbing
@@ -62,6 +63,7 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis (Analisis Perbandingan Durasi Pencarian Algoritma, Analisis Perbandingan Konsistensi Algoritma, Analisis Variasi Parameter pada Genetic Algorithm)
 - Pengerjaan Bagian 3.2 Saran
 - Pengerjaan README	
+- Finalisasi Laporan Tugas Besar
 4. Muhammad Faiz Atharrahman - **18222063**
 - Pembuatan Source Code Steepest Ascent Hill-Climbing
 - Pembuatan Source Code Hill-Climbing with Sideways Move
