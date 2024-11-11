@@ -19,4 +19,9 @@ Langkah-langkah di bawah ini akan membantu untuk mengatur dan menjalankan progra
 Pastikan telah menginstall:
 - **Go** : https://golang.org/doc/install untuk menjalankan program utama.
 - **Git**: https://git-scm.com/downloads untuk mengkloning repository ini.
-
+1. **Clone repository ini:**
+   git clone https://github.com/faizathr/magic-cube.git
+   cd magic-cube
+2. **Jalankan Server Lokal:**
+   Gunakan perintah berikut untuk menjalankan server lokal dengan Python
+   python -m http.server
