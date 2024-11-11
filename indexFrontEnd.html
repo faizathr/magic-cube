@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diagonal Magic Cube Solver</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="input-div" class="input">
+        <h3>Choose your algorithm!</h3>
+        <select id="algorithm">
+          <option value="Steepest-Ascent Hill Climbing">
+            Steepest-Ascent Hill Climbing
+          </option>
+          <option value="Stochastic Hill Climbing">
+            Stochastic Hill Climbing
+          </option>
+          <option value="Hill Climbing with Sideways Move">
+            Hill Climbing with Sideways Move
+          </option>
+          <option value="Simulated Annealing">Simulated Annealing</option>
+          <option value="Random Restart Hill Climbing">
+            Random Restart Hill Climbing
+          </option>
+          <option value="Genetic Algorithm">Genetic Algorithm</option>
+        </select>
+        <div id="input-parameter">
+          <label for="maxRestart">Maximum Restarts:</label>
+          <input type="number" id="maxRestart" value="Not Needed" />
+
+          <label for="maxSideways">Maximum Sideways:</label>
+          <input type="number" id="maxSideways" value="Not Needed" />
+
+          <label for="population">Population:</label>
+          <input type="number" id="population" value="Not Needed" />
+
+          <label for="maxIteration">Max Iteration:</label>
+          <input type="number" id="maxIteration" value="Not Needed" />
+        </div>
+
+        <div id="button-div">
+          <button id="toggle-button" class="start">Start</button>
+          <div id="slider-div">
+            <input
+              type="range"
+              id="progress-slider"
+              min="0"
+              max="1000"
+              value="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div id="threed-visualization-div" class="threed-visualization-div">
+        <h3>3D Visualization</h3>
+        <canvas></canvas>
+      </div>
+
+      <div id="result-status" class="result-status">
+        <p>Iteration: <span id="iteration"></span></p>
+        <p>Time Elapsed: <span id="timeElapsed"></span></p>
+        <p>Initial Value: <span id="initialValue"></span></p>
+        <p>Final Value: <span id="finalValue"></span></p>
+      </div>
+
+      <div id="graphic-visualization" class="graphic-visualization">
+        <h3>Graphic Visualization</h3>
+        <canvas></canvas>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
