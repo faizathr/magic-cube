@@ -1038,7 +1038,7 @@ func main() {
 	fmt.Printf("Len objective function logs: %d\n", len(test_steepest_ascent.objective_function_logs))
 	fmt.Printf("Objective logs: %v\n", test_steepest_ascent.objective_function_logs)
 	fmt.Println(test_steepest_ascent.final_state)
-	// printOutput(test_steepest_ascent.final_state)
+	printOutput(test_steepest_ascent.final_state)
 
 	// ===== HILL CLIMBING WITH SIDEWAYS MOVE TEST =====
 	test_sideways_move := hill_climbing_with_sideways_move(cube, violated_magic_sum_count, 10)
@@ -1048,10 +1048,10 @@ func main() {
 	fmt.Printf("max sideways: %d\n", test_sideways_move.max_sideways)
 	fmt.Printf("Initial Obj Value: %d\n", test_sideways_move.objective_function_logs[0])
 	fmt.Printf("Final Obj Value: %d\n", test_sideways_move.objective_function_logs[len(test_sideways_move.objective_function_logs)-1])
-	// fmt.Printf("Len swap logs: %d\n", len(test_sideways_move.swap_logs))
+	fmt.Printf("Len swap logs: %d\n", len(test_sideways_move.swap_logs))
 	fmt.Printf("Len objective function logs: %d\n", len(test_sideways_move.objective_function_logs))
 	fmt.Printf("Objective logs: %v\n", test_sideways_move.objective_function_logs)
-	// printOutput(test_sideways_move.final_state)
+	printOutput(test_sideways_move.final_state)
 
 	// ===== RANDOM RESTART TEST =====
 	test_random_restart := random_restart_hill_climbing(cube, violated_magic_sum_count, 10)
@@ -1066,7 +1066,7 @@ func main() {
 	fmt.Printf("Len objective function logs: %d\n", len(test_random_restart.objective_function_logs))
 	fmt.Printf("Total iteration: %d\n", test_random_restart.total_iteration)
 	fmt.Printf("Objective logs: %v\n", test_random_restart.objective_function_logs)
-	// printOutput(test_random_restart.final_state)
+	printOutput(test_random_restart.final_state)
 
 	// ===== STOCHASTIC HILL CLIMBING TEST =====
 	test_stochastic := stochastic_hill_climbing(cube, violated_magic_sum_count, 10000)
@@ -1076,10 +1076,10 @@ func main() {
 	fmt.Printf("max iteration: %d\n", test_stochastic.max_iteration)
 	fmt.Printf("Initial Obj Value: %d\n", test_stochastic.objective_function_logs[0])
 	fmt.Printf("Final Obj Value: %d\n", test_stochastic.objective_function_logs[len(test_stochastic.objective_function_logs)-1])
-	// fmt.Printf("Len swap logs: %d\n", len(test_stochastic.swap_logs))
+	fmt.Printf("Len swap logs: %d\n", len(test_stochastic.swap_logs))
 	fmt.Printf("Len objective function logs: %d\n", len(test_stochastic.objective_function_logs))
 	fmt.Printf("Objective logs: %v\n", test_stochastic.objective_function_logs)
-	// printOutput(test_stochastic.final_state)
+	printOutput(test_stochastic.final_state)
 
 	// ===== SIMULATED ANNEALING TEST =====
 	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10000, 0.9999)
@@ -1094,7 +1094,7 @@ func main() {
 	fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
 	fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
 	fmt.Printf("Objective logs: %v\n", test_simulated_annealing.objective_function_logs)
-	// printOutput(test_simulated_annealing.final_state)
+	printOutput(test_simulated_annealing.final_state)
 	
 	// ===== GENETIC ALGORITHM TEST =====
 	test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 25, 10)
@@ -1108,7 +1108,7 @@ func main() {
 	fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
 	fmt.Printf("final best cube: %v\n", test_genetic_algorithm.final_best_cube)
 	fmt.Printf("GA, time exceeded: %d\n", test_genetic_algorithm.time)
-	// printOutput(test_genetic_algorithm.final_best_cube)
+	printOutput(test_genetic_algorithm.final_best_cube)
 	
 	
 
