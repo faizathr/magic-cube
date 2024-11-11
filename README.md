@@ -66,5 +66,5 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Pembuatan Source Code Random Restart Hill-Climbing
 - Pembuatan Source Code Stochastic Hill-Climbing
 - Pembuatan Source Code  Simulated Annealing
-- Pembuatan Visualisasi 3D
-- Pembuatan Plot Grafik
+- Pembuatan Visualisasi 3D 
+- Pembuatan Plot Grafik dan Pengisian Plot Objective Value pada Laporan
