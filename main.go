@@ -1019,8 +1019,9 @@ func genetic_algorithm(objective_function ObjectiveFunction, n_population int, n
 }
 
 func main() {
-	var cube Cube = generate_random_cube()
-	
+	numbers := []int{105,60,71,25,86,19,119,11,78,108,35,89,65,58,41,114,59,95,33,97,49,76,61,96,73,111,37,79,32,122,8,64,42,10,5,3,43,94,72,26,44,124,13,53,6,100,22,15,57,87,20,82,31,63,45,70,38,99,47,115,85,1,23,67,121,56,18,74,123,29,12,102,16,2,125,107,40,120,113,117,17,27,54,110,28,81,50,109,46,14,90,92,51,4,24,75,77,69,68,84,88,103,80,66,39,7,118,30,34,106,83,55,98,9,104,21,91,36,93,116,48,101,112,52,62}
+	cube := generate_cube_from_numbers(numbers)
+
 	// choose one of objective function
 	// 1. violated_magic_sum_count
 	// 2. sum_of_magic_sum_differences
@@ -1028,76 +1029,79 @@ func main() {
 	// ===== STEEPEST ASCENT TEST =====
 	test_steepest_ascent := steepest_ascent_hill_climbing(cube, violated_magic_sum_count)
 	fmt.Println("======== Steepest Ascent Test ========")
-	// fmt.Printf("Steepest Ascent: time exceeded: %d\n", test_steepest_ascent.time)
-	// fmt.Printf("iteration: %d\n", test_steepest_ascent.iteration)
-	// fmt.Printf("Initial Obj Value: %d\n", test_steepest_ascent.objective_function_logs[0])
-	// fmt.Printf("Final Obj Value: %d\n", test_steepest_ascent.objective_function_logs[len(test_steepest_ascent.objective_function_logs)-1])
-	// fmt.Printf("Len swap logs: %d\n", len(test_steepest_ascent.swap_logs))
-	// fmt.Printf("Len objective function logs: %d\n", len(test_steepest_ascent.objective_function_logs))
-	fmt.Println(test_steepest_ascent.final_state)
-	printOutput(test_steepest_ascent.final_state)
+	fmt.Printf("Steepest Ascent: time exceeded: %d\n", test_steepest_ascent.time)
+	fmt.Printf("iteration: %d\n", test_steepest_ascent.iteration)
+	fmt.Printf("Initial Obj Value: %d\n", test_steepest_ascent.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_steepest_ascent.objective_function_logs[len(test_steepest_ascent.objective_function_logs)-1])
+	fmt.Printf("Len swap logs: %d\n", len(test_steepest_ascent.swap_logs))
+	fmt.Printf("Len objective function logs: %d\n", len(test_steepest_ascent.objective_function_logs))
+	// fmt.Println(test_steepest_ascent.final_state)
+	// printOutput(test_steepest_ascent.final_state)
 
 	// ===== HILL CLIMBING WITH SIDEWAYS MOVE TEST =====
-	// test_sideways_move := hill_climbing_with_sideways_move(cube, violated_magic_sum_count, 5)
-	// fmt.Println("======== Hill Climbing with Sideways Move Test ========")
-	// fmt.Printf("Sideways Move: time exceeded: %d\n", test_sideways_move.time)
-	// fmt.Printf("iteration: %d\n", test_sideways_move.iteration)
-	// fmt.Printf("max sideways: %d\n", test_sideways_move.max_sideways)
-	// fmt.Printf("Initial Obj Value: %d\n", test_sideways_move.objective_function_logs[0])
-	// fmt.Printf("Final Obj Value: %d\n", test_sideways_move.objective_function_logs[len(test_sideways_move.objective_function_logs)-1])
-	// fmt.Printf("Len swap logs: %d\n", len(test_sideways_move.swap_logs))
-	// fmt.Printf("Len objective function logs: %d\n", len(test_sideways_move.objective_function_logs))
+	test_sideways_move := hill_climbing_with_sideways_move(cube, violated_magic_sum_count, 10)
+	fmt.Println("======== Hill Climbing with Sideways Move Test ========")
+	fmt.Printf("Sideways Move: time exceeded: %d\n", test_sideways_move.time)
+	fmt.Printf("iteration: %d\n", test_sideways_move.iteration)
+	fmt.Printf("max sideways: %d\n", test_sideways_move.max_sideways)
+	fmt.Printf("Initial Obj Value: %d\n", test_sideways_move.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_sideways_move.objective_function_logs[len(test_sideways_move.objective_function_logs)-1])
+	fmt.Printf("Len swap logs: %d\n", len(test_sideways_move.swap_logs))
+	fmt.Printf("Len objective function logs: %d\n", len(test_sideways_move.objective_function_logs))
+	// printOutput(test_sideways_move.final_state)
 
 	// ===== RANDOM RESTART TEST =====
-	// test_random_restart := random_restart_hill_climbing(cube, violated_magic_sum_count, 5)
-	// fmt.Println("======== Random Restart Test ========")
-	// fmt.Printf("Random Restart: time exceeded: %d\n", test_random_restart.time)
-	// fmt.Printf("iteration per restart: %d\n", test_random_restart.iteration_per_restart)	
-	// fmt.Printf("max restart: %d\n", test_random_restart.max_restart)
-	// fmt.Printf("restart iteration: %d\n", test_random_restart.restart_iteration)
-	// fmt.Printf("Initial Obj Value: %d\n", test_random_restart.objective_function_logs[0])
-	// fmt.Printf("Final Obj Value: %d\n", test_random_restart.objective_function_logs[len(test_random_restart.objective_function_logs)-1])
-	// fmt.Printf("Len swap logs: %d\n", len(test_random_restart.swap_logs))
-	// fmt.Printf("Len objective function logs: %d\n", len(test_random_restart.objective_function_logs))
-	// fmt.Printf("Total iteration: %d\n", test_random_restart.total_iteration)
+	test_random_restart := random_restart_hill_climbing(cube, violated_magic_sum_count, 10)
+	fmt.Println("======== Random Restart Test ========")
+	fmt.Printf("Random Restart: time exceeded: %d\n", test_random_restart.time)
+	fmt.Printf("iteration per restart: %d\n", test_random_restart.iteration_per_restart)	
+	fmt.Printf("max restart: %d\n", test_random_restart.max_restart)
+	fmt.Printf("restart iteration: %d\n", test_random_restart.restart_iteration)
+	fmt.Printf("Initial Obj Value: %d\n", test_random_restart.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_random_restart.objective_function_logs[len(test_random_restart.objective_function_logs)-1])
+	fmt.Printf("Len swap logs: %d\n", len(test_random_restart.swap_logs))
+	fmt.Printf("Len objective function logs: %d\n", len(test_random_restart.objective_function_logs))
+	fmt.Printf("Total iteration: %d\n", test_random_restart.total_iteration)
+	// printOutput(test_random_restart.final_state)
 
 	// ===== STOCHASTIC HILL CLIMBING TEST =====
-	// test_stochastic := stochastic_hill_climbing(cube, violated_magic_sum_count, 10000)
-	// fmt.Println("======== Stochastic Hill Climbing Test ========")
-	// fmt.Printf("Stochastic: time exceeded: %d\n", test_stochastic.time)
-	// fmt.Printf("iteration: %d\n", test_stochastic.iteration)
-	// fmt.Printf("max iteration: %d\n", test_stochastic.max_iteration)
-	// fmt.Printf("Initial Obj Value: %d\n", test_stochastic.objective_function_logs[0])
-	// fmt.Printf("Final Obj Value: %d\n", test_stochastic.objective_function_logs[len(test_stochastic.objective_function_logs)-1])
-	// fmt.Printf("Len swap logs: %d\n", len(test_stochastic.swap_logs))
-	// fmt.Printf("Len objective function logs: %d\n", len(test_stochastic.objective_function_logs))
+	test_stochastic := stochastic_hill_climbing(cube, violated_magic_sum_count, 10000)
+	fmt.Println("======== Stochastic Hill Climbing Test ========")
+	fmt.Printf("Stochastic: time exceeded: %d\n", test_stochastic.time)
+	fmt.Printf("iteration: %d\n", test_stochastic.iteration)
+	fmt.Printf("max iteration: %d\n", test_stochastic.max_iteration)
+	fmt.Printf("Initial Obj Value: %d\n", test_stochastic.objective_function_logs[0])
+	fmt.Printf("Final Obj Value: %d\n", test_stochastic.objective_function_logs[len(test_stochastic.objective_function_logs)-1])
+	fmt.Printf("Len swap logs: %d\n", len(test_stochastic.swap_logs))
+	fmt.Printf("Len objective function logs: %d\n", len(test_stochastic.objective_function_logs))
+	// printOutput(test_stochastic.final_state)
 
 	// ===== SIMULATED ANNEALING TEST =====
-	// test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 1000000, 0.99999)
-	// fmt.Println("======== Simulated Annealing Test ========")
-	// fmt.Printf("SA, time exceeded: %d\n", test_simulated_annealing.time)
-	// fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
-	// fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
-	// fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
-	// fmt.Printf("len swap logs: %d\n", len(test_simulated_annealing.swap_logs))
-	// fmt.Printf("len objective function logs: %d\n", len(test_simulated_annealing.objective_function_logs))
-	// fmt.Printf("len probability plot: %d\n", len(test_simulated_annealing.probability_plot))
-	// fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
+	test_simulated_annealing := simulated_annealing(cube, violated_magic_sum_count, 10000, 0.999999999)
+	fmt.Println("======== Simulated Annealing Test ========")
+	fmt.Printf("SA, time exceeded: %d\n", test_simulated_annealing.time)
+	fmt.Printf("stuck iteration: %d\n", test_simulated_annealing.stuck_iteration) // masuk ke DeltaE <= 0
+	fmt.Printf("not changed: %d\n", test_simulated_annealing.not_changed) // masuk ke DeltaE <= 0 tetapi tidak berpindah ke state baru yang lebih buruk
+	fmt.Printf("Initial Obj Value: %d\n", test_simulated_annealing.objective_function_logs[0])
+	fmt.Printf("len swap logs: %d\n", len(test_simulated_annealing.swap_logs))
+	fmt.Printf("len objective function logs: %d\n", len(test_simulated_annealing.objective_function_logs))
+	fmt.Printf("len probability plot: %d\n", len(test_simulated_annealing.probability_plot))
+	fmt.Printf("Final Obj Value: %d\n", test_simulated_annealing.objective_function_logs[len(test_simulated_annealing.objective_function_logs)-1])
 	// fmt.Printf("probability_plot %f\n", test_simulated_annealing.probability_plot)
-
+	// printOutput(test_simulated_annealing.final_state)
 	
 	// ===== GENETIC ALGORITHM TEST =====
-	// test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 6, 1000)
-	// fmt.Println("======== Genetic Algorithm Test ========")
+	test_genetic_algorithm := genetic_algorithm(violated_magic_sum_count, 10, 10000)
+	fmt.Println("======== Genetic Algorithm Test ========")
 	// fmt.Printf("GA objective value plot: %d\n", test_genetic_algorithm.objective_value_plot)
-	// fmt.Printf("len obj value plot: %d\n", len(test_genetic_algorithm.objective_value_plot))
+	fmt.Printf("len obj value plot: %d\n", len(test_genetic_algorithm.objective_value_plot))
 	// fmt.Printf("avg objective value: %d\n", test_genetic_algorithm.avg_objective_value)
-	// fmt.Printf("len avg obj value: %d\n", len(test_genetic_algorithm.avg_objective_value))
-	// fmt.Printf("population: %d\n", test_genetic_algorithm.population)
-	// fmt.Printf("iteration: %d\n", test_genetic_algorithm.iteration)
-	// fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
-	// fmt.Printf("GA, time exceeded: %d\n", test_genetic_algorithm.time)
-	
+	fmt.Printf("len avg obj value: %d\n", len(test_genetic_algorithm.avg_objective_value))
+	fmt.Printf("population: %d\n", test_genetic_algorithm.population)
+	fmt.Printf("iteration: %d\n", test_genetic_algorithm.iteration)
+	fmt.Printf("final best value: %d\n", test_genetic_algorithm.final_best_value)
+	fmt.Printf("GA, time exceeded: %d\n", test_genetic_algorithm.time)
+	// printOutput(test_genetic_algorithm.final_best_cube)
 	
 	
 
