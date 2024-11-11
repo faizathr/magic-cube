@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: black;
+}
+#three-js-canvas {
+    width: 50%;
+    height: 80%;
+    display: block;
+    top: 0;
+    left: 0;
+}
+#objective-function-chart {
+    width: 50%;
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin-top: 5%;
+    margin-right: 0;
+}
+
+.playpause {
+    label {
+      display: block;
+      box-sizing: border-box;
+      width: 0;
+      height: 30px;
+      color: white;
+  
+      border-color: black black black white;
+      transition: 100ms all ease;
+      cursor: pointer;
+      border-style: double;
+      border-width: 0px 0 0px 30px;
+    }
+    input[type="checkbox"] {
+      position: absolute;
+      left: -9999px;
+      &:checked + label {
+        border-style: solid;
+        border-width: 15px 0 15px 30px;
+      }
+      &:focus + label {
+        box-shadow: 0 0 5px lightblue;
+      }
+    }
+  }
