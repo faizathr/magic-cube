@@ -59,9 +59,9 @@ Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan p
 - Pengerjaan Laporan Bagian Deskripsi Persoalan
 - Pengerjaan Laporan Bagian Pemilihan Objective Function
 - Pengerjaan Laporan Bagian Penjelasan Implementasi 3 Algoritma Local Search (Steepest Ascent Hill-Climbing, Simulated Annealing, Genetic Algorithm)
-- Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis
-- Pengerjaan Kesimpulan dan Saran
-- Pembuatan README
+- Pengerjaan Laporan Bagian Hasil Eksperimen dan Analisis (Analisis Perbandingan Durasi Pencarian Algoritma, Analisis Perbandingan Konsistensi Algoritma, Analisis Variasi Parameter pada Genetic Algorithm)
+- Pengerjaan Bagian 3.2 Saran
+- Pengerjaan README	
 4. Muhammad Faiz Atharrahman - **18222063**
 - Pembuatan Source Code Steepest Ascent Hill-Climbing
 - Pembuatan Source Code Hill-Climbing with Sideways Move
