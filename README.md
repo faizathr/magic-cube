@@ -26,6 +26,6 @@ Pastikan telah menginstall:
    Gunakan perintah berikut untuk menjalankan server lokal dengan Python
    python -m http.server
 3. **Akses Program di Browser:**
-Buka browser dan akses URL berikut --> http://127.0.0.1:8000/indexFrontEnd.html
+    Buka browser dan akses URL berikut --> http://127.0.0.1:8000/indexFrontEnd.html
 
 Setelah mengikuti langkah-langkah di atas, antarmuka program dapat diakses dan percobaan algoritma-algoritma yang diimplementasikan dapat dilakukan pada halaman indexFrontEnd.html.
